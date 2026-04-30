@@ -184,13 +184,35 @@ export default function InventoryAlert() {
                   }
                 />
               </div>
-              <div className="bg-gray-100 p-3 border-l-4 border-black">
-                <div className="flex items-center gap-2 mb-2 text-black/50">
-                  <Info size={12} />{' '}
-                  <span className="text-[9px] font-black uppercase">
+              <div className="bg-gray-100 p-3 border-l-4 border-black relative">
+                {/* Gunakan class 'group' dan 'cursor-help' di sini */}
+                <div className="flex items-center gap-2 mb-2 text-black/50 w-fit cursor-help group">
+                  <Info size={12} />
+                  <span className="text-[9px] font-black uppercase border-b border-dashed border-black/30">
                     SMA Config
                   </span>
+
+                  {/* TOOLTIP POPUP (Muncul saat di-hover) */}
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-black text-white p-4 text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-[4px_4px_0px_#dc2626] pointer-events-none">
+                    <p className="text-red-500 font-black mb-1 tracking-widest uppercase text-xs">
+                      Simple Moving Average
+                    </p>
+                    <p className="font-medium leading-relaxed text-gray-300">
+                      Masukkan estimasi rata-rata pemakaian bahan per 1
+                      struk/transaksi. <br />
+                      <br />
+                      <span className="text-white font-bold">
+                        AI Sistem
+                      </span>{' '}
+                      akan menggunakan angka ini untuk memprediksi kapan stok
+                      bahan akan habis (Status Kritis) berdasarkan tren
+                      penjualan.
+                    </p>
+                    {/* Segitiga panah ke bawah */}
+                    <div className="absolute top-full left-6 -mt-1 border-4 border-transparent border-t-black"></div>
+                  </div>
                 </div>
+
                 <input
                   type="number"
                   step="0.001"
