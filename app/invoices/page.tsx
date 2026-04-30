@@ -15,6 +15,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+import { formatRupiah } from '@/lib/utils';
+
 export default function InvoiceReceiptPage() {
   // --- STATES UNTUK FILTER, SORT, SEARCH, & PAGINATION ---
   const [page, setPage] = useState(1);
@@ -72,12 +74,6 @@ export default function InvoiceReceiptPage() {
     setPage(1);
   };
 
-  const formatRupiah = (num: any) =>
-    new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0,
-    }).format(Number(num) || 0);
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleString('id-ID', {
       dateStyle: 'medium',

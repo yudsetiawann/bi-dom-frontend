@@ -1,6 +1,6 @@
 'use client';
-
 import { X, Receipt, FileText } from 'lucide-react';
+import { formatRupiah } from '@/lib/utils'; // <-- Memanggil fungsi global
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -17,15 +17,6 @@ export default function TransactionModal({
 }: TransactionModalProps) {
   if (!isOpen) return null;
 
-  const formatRupiah = (val: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0,
-    }).format(val);
-  };
-
-  // Tutup modal jika user klik area gelap di luar kotak
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -36,7 +27,6 @@ export default function TransactionModal({
       onClick={handleOverlayClick}
     >
       <div className="bg-white border-4 border-black w-full max-w-lg shadow-[12px_12px_0px_#dc2626] relative overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* HEADER MODAL */}
         <div className="bg-black text-white p-4 flex justify-between items-center border-b-2 border-black">
           <div className="flex items-center gap-2">
             <Receipt size={20} className="text-red-600" />
@@ -51,8 +41,6 @@ export default function TransactionModal({
             <X size={24} />
           </button>
         </div>
-
-        {/* BODY MODAL */}
         <div className="p-6 md:p-8">
           {isLoading ? (
             <div className="py-12 text-center text-black font-black tracking-widest text-xs animate-pulse">
@@ -64,7 +52,6 @@ export default function TransactionModal({
             </div>
           ) : (
             <>
-              {/* Info Struk Atas */}
               <div className="mb-6 flex justify-between items-end border-b-2 border-black/10 pb-4">
                 <div>
                   <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
@@ -83,13 +70,10 @@ export default function TransactionModal({
                   </p>
                 </div>
               </div>
-
-              {/* Rincian Item (Drill-down Table) */}
               <div className="mb-6">
                 <h3 className="text-[10px] font-black italic tracking-widest uppercase text-red-600 mb-3 flex items-center gap-2">
                   <FileText size={12} /> // Itemized_Details
                 </h3>
-
                 <div className="max-h-[250px] overflow-y-auto border-2 border-black/10 bg-gray-50 p-2">
                   <table className="w-full text-xs font-bold">
                     <tbody>
@@ -113,8 +97,6 @@ export default function TransactionModal({
                   </table>
                 </div>
               </div>
-
-              {/* Total Bawah */}
               <div className="bg-black text-white p-4 flex justify-between items-center shadow-[4px_4px_0px_#dc2626]">
                 <span className="font-black text-xs uppercase tracking-widest text-red-500">
                   Net_Total

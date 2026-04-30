@@ -1,12 +1,20 @@
-'use client';
-
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
-import { Menu, X, AlertTriangle } from 'lucide-react'; // Tambahkan AlertTriangle
+// Tambahkan import icon baru dari lucide-react:
+import {
+  Menu,
+  X,
+  AlertTriangle,
+  BarChart2,
+  UploadCloud,
+  Coffee,
+  PackageSearch,
+  ReceiptText,
+} from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -17,11 +25,31 @@ export default function Sidebar() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: '📊' },
-    { name: 'Import Data', path: '/import', icon: '📤' },
-    { name: 'Master Product', path: '/products', icon: '☕' },
-    { name: 'Inventory Alert', path: '/inventory', icon: '📦' },
-    { name: 'Invoice', path: '/invoices', icon: '📝' },
+    {
+      name: 'Dashboard',
+      path: '/',
+      icon: <BarChart2 size={20} strokeWidth={2.5} />,
+    },
+    {
+      name: 'Import Data',
+      path: '/import',
+      icon: <UploadCloud size={20} strokeWidth={2.5} />,
+    },
+    {
+      name: 'Master Product',
+      path: '/products',
+      icon: <Coffee size={20} strokeWidth={2.5} />,
+    },
+    {
+      name: 'Inventory Alert',
+      path: '/inventory',
+      icon: <PackageSearch size={20} strokeWidth={2.5} />,
+    },
+    {
+      name: 'Invoice',
+      path: '/invoices',
+      icon: <ReceiptText size={20} strokeWidth={2.5} />,
+    },
   ];
 
   // 2. Fungsi eksekusi Logout HANYA berjalan jika sudah dikonfirmasi
@@ -172,11 +200,14 @@ export default function Sidebar() {
                 {isActive && (
                   <div className="absolute left-0 w-1 h-2/3 bg-red-600 shadow-[0_0_15px_rgba(220,38,38,1)]"></div>
                 )}
+
+                {/* UBAH BAGIAN INI: Tidak pakai grayscale lagi, tapi atur opacity & color SVG */}
                 <span
-                  className={`text-xl ${isActive ? '' : 'grayscale opacity-50 group-hover:grayscale-0'}`}
+                  className={`transition-colors ${isActive ? 'text-red-500' : 'text-gray-500 group-hover:text-white'}`}
                 >
                   {item.icon}
                 </span>
+
                 <span className="uppercase tracking-widest text-[11px]">
                   {item.name}
                 </span>

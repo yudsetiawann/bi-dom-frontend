@@ -1,9 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/axios';
-import KpiCard from '@/components/ui/KpiCard';
+import { useDashboard } from '@/hooks/useDashboard';
+import { formatRupiah } from '@/lib/utils';
+import {
+  MarketBasketPair,
+  TopProduct,
+  InventoryAlert,
+} from '@/types/dashboard.types';
+
 import SalesChart from '@/components/ui/SalesChart';
 import CategoryDonutChart from '@/components/ui/CategoryDonutChart';
 import {
@@ -16,147 +20,110 @@ import TransactionModal from '@/components/ui/TransactionModal';
 import { AlertTriangle } from 'lucide-react';
 
 export default function Dashboard() {
-  const currentYear = new Date().getFullYear();
-
-  // --- STATE ---
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [chartPeriod, setChartPeriod] = useState<'year' | 'month'>('year');
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(
-    null,
-  );
-  const [hiddenCategories, setHiddenCategories] = useState<number[]>([]);
-  const [selectedTrxId, setSelectedTrxId] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // --- GET PARAMS URL BUILDER ---
-  const getQueryParams = (includeExclude = false) => {
-    let q = `?year=${selectedYear}&period=${chartPeriod}`;
-    if (selectedMonthIndex !== null) q += `&monthIndex=${selectedMonthIndex}`;
-    if (includeExclude && hiddenCategories.length > 0)
-      q += `&exclude=${hiddenCategories.join(',')}`;
-    return q;
-  };
-
-  // --- FETCH QUERIES ---
-  const { data: availableYears = [] } = useQuery({
-    queryKey: ['availableYears'],
-    queryFn: async () =>
-      (await api.get('/dashboard/available-years')).data.data,
-  });
-
-  const { data: kpiData } = useQuery({
-    queryKey: [
-      'kpi',
-      selectedYear,
-      chartPeriod,
-      selectedMonthIndex,
-      hiddenCategories,
-    ],
-    queryFn: async () =>
-      (await api.get(`/dashboard/kpi${getQueryParams(true)}`)).data.data,
-  });
-
-  const { data: chartData, isLoading: loadChart } = useQuery({
-    queryKey: ['chart', selectedYear, chartPeriod, selectedMonthIndex],
-    queryFn: async () =>
-      (await api.get(`/dashboard/charts${getQueryParams(false)}`)).data.data,
-  });
-
-  const { data: tableData } = useQuery({
-    queryKey: [
-      'tables',
-      selectedYear,
-      chartPeriod,
-      selectedMonthIndex,
-      hiddenCategories,
-    ],
-    queryFn: async () => {
-      const [trx, top] = await Promise.all([
-        api.get(`/dashboard/transactions${getQueryParams(true)}`),
-        api.get(`/dashboard/top-products${getQueryParams(true)}`),
-      ]);
-      return { latestTrx: trx.data.data, topProducts: top.data.data };
-    },
-  });
-
-  const { data: inventoryAlerts = [] } = useQuery({
-    queryKey: ['inventoryAlerts'],
-    queryFn: async () =>
-      (await api.get('/dashboard/inventory-alerts')).data.data,
-  });
-
-  const { data: detailData, isLoading: loadDetail } = useQuery({
-    queryKey: ['transactionDetail', selectedTrxId],
-    queryFn: async () => {
-      if (!selectedTrxId) return null;
-      return (await api.get(`/dashboard/transactions/${selectedTrxId}`)).data
-        .data;
-    },
-    enabled: !!selectedTrxId,
-  });
-
-  const { data: advData } = useQuery({
-    queryKey: [
-      'advancedAnalytics',
-      selectedYear,
-      chartPeriod,
-      selectedMonthIndex,
-    ],
-    queryFn: async () =>
-      (await api.get(`/dashboard/advanced-analytics${getQueryParams(false)}`))
-        .data.data,
-  });
-
-  // --- EFFECTS & HANDLERS ---
-  useEffect(() => {
-    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
-      setSelectedYear(availableYears[0]);
-    }
-  }, [availableYears]);
-
-  const handleBackToYear = () => {
-    setChartPeriod('year');
-    setSelectedMonthIndex(null);
-  };
-
-  const handleChartClick = (idx: number) => {
-    if (chartPeriod === 'year') {
-      setChartPeriod('month');
-      setSelectedMonthIndex(idx);
-    }
-  };
-
-  const formatRupiah = (number: any) =>
-    new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0,
-    }).format(Number(number) || 0);
-
-  const { data: donutData } = useQuery({
-    queryKey: [
-      'donut',
-      selectedYear,
-      chartPeriod,
-      selectedMonthIndex,
-      hiddenCategories,
-    ],
-    queryFn: async () =>
-      (await api.get(`/dashboard/donut-chart${getQueryParams(true)}`)).data
-        .data,
-  });
+  // Panggil Custom Hook!
+  const { state, setters, data, loaders, handlers } = useDashboard();
 
   return (
     <main className="p-4 md:p-8 max-w-7xl mx-auto font-montserrat min-h-screen pb-20">
       <TransactionModal
-        isOpen={isModalOpen}
+        isOpen={state.isModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
-          setSelectedTrxId(null);
+          setters.setIsModalOpen(false);
+          setters.setSelectedTrxId(null);
         }}
-        data={detailData}
-        isLoading={loadDetail}
+        data={data.detailData}
+        isLoading={loaders.loadDetail}
       />
+
+      {/* MODAL PEAK HOUR DRILL-DOWN */}
+      {state.peakDrillDown && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setters.setPeakDrillDown(null)}
+          ></div>
+          <div className="relative z-10 bg-white border-4 border-black w-full max-w-md shadow-[8px_8px_0px_#dc2626] p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-6 border-b-2 border-black pb-2">
+              <h2 className="font-black italic tracking-widest uppercase text-lg text-black">
+                {state.peakDrillDown.day} @ {state.peakDrillDown.hour}:00
+              </h2>
+              <button
+                onClick={() => setters.setPeakDrillDown(null)}
+                className="text-black hover:text-red-600 font-black"
+              >
+                X
+              </button>
+            </div>
+            {loaders.loadPeakDetail ? (
+              <div className="text-center py-10 font-black animate-pulse text-gray-400 text-xs">
+                ANALYZING CORRELATION...
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-2">
+                    Total Trafik:
+                  </h3>
+                  <div className="text-3xl font-black">
+                    {data.peakDetailData?.total_trx}{' '}
+                    <span className="text-sm">Struk</span>
+                  </div>
+                </div>
+                <div className="bg-gray-100 p-4 border-l-4 border-black">
+                  <h3 className="text-[10px] font-black tracking-widest uppercase mb-3">
+                    🔥 Menu Terlaris di Jam Ini:
+                  </h3>
+                  {data.peakDetailData?.top_items?.map(
+                    (item: TopProduct, i: number) => (
+                      <div
+                        key={i}
+                        className="flex justify-between text-xs font-bold mb-1 border-b border-gray-300 pb-1"
+                      >
+                        <span className="uppercase">{item.name}</span>
+                        <span className="text-red-600">
+                          {item.total_qty} PCS
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
+                <div className="bg-red-50 p-4 border-2 border-red-600 shadow-[4px_4px_0px_#dc2626]">
+                  <h3 className="text-[10px] font-black text-red-600 tracking-widest uppercase mb-3 flex items-center gap-2">
+                    🤖 AI Bundling Suggestion:
+                  </h3>
+                  {data.peakDetailData?.market_basket?.length > 0 ? (
+                    data.peakDetailData.market_basket.map(
+                      (pair: MarketBasketPair, i: number) => (
+                        <div
+                          key={i}
+                          className="text-xs font-bold uppercase mb-2 leading-relaxed"
+                        >
+                          Peluang Paket #{i + 1}: <br />
+                          <span className="text-black font-black bg-white px-1 border border-black">
+                            {pair.product_a}
+                          </span>{' '}
+                          +{' '}
+                          <span className="text-black font-black bg-white px-1 border border-black">
+                            {pair.product_b}
+                          </span>
+                          <div className="text-[9px] text-gray-500 mt-1 lowercase italic">
+                            *(Dibeli bersamaan {pair.times_bought_together} kali
+                            di jam ini)
+                          </div>
+                        </div>
+                      ),
+                    )
+                  ) : (
+                    <div className="text-xs font-bold italic text-gray-500">
+                      Belum ada korelasi yang kuat.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* HEADER */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
@@ -168,137 +135,97 @@ export default function Dashboard() {
             DOM Social Hub Integrated System
           </p>
         </div>
-        <div className="flex bg-white border-2 border-black shadow-[4px_4px_0px_#000000]">
-          {availableYears.map((y: number) => (
-            <button
-              key={y}
-              onClick={() => {
-                setSelectedYear(y);
-                handleBackToYear();
+        <div className="flex gap-2">
+          <div className="relative group">
+            <select
+              value={state.selectedYear}
+              onChange={(e) => {
+                setters.setSelectedYear(Number(e.target.value));
+                handlers.handleBackToYear();
               }}
-              className={`px-4 py-2 text-[10px] font-black uppercase transition-colors border-r-2 border-black last:border-r-0 ${selectedYear === y ? 'bg-red-600 text-white' : 'hover:bg-gray-100'}`}
+              className="appearance-none bg-white border-2 border-black px-4 py-2 pr-8 text-[10px] font-black uppercase text-black cursor-pointer shadow-[4px_4px_0px_#000000] focus:outline-none hover:bg-red-50 transition-colors"
             >
-              {y}
-            </button>
-          ))}
+              {data.availableYears.map((y: number) => (
+                <option key={y} value={y} className="font-bold">
+                  THN {y}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black">
+              <svg
+                className="fill-current h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </div>
+          </div>
           <ExportButton />
         </div>
       </header>
 
-      {/* KPI */}
       {/* KPI SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-2">
-        {/* CARD 1: GROSS REVENUE (KOTOR) */}
         <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between">
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
             // GROSS_REVENUE (
-            {chartPeriod === 'year'
-              ? selectedYear
-              : chartData?.labels[0]?.split(' ')[1] || 'ALL'}
+            {state.chartPeriod === 'year'
+              ? state.selectedYear
+              : data.chartData?.labels[0]?.split(' ')[1] || 'ALL'}
             )
           </h3>
           <div className="text-3xl lg:text-3xl font-black text-black break-words">
-            {formatRupiah(kpiData?.revenue)}
+            {formatRupiah(data.kpiData?.revenue)}
           </div>
           <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
-            Total Struk: {kpiData?.transaction_count || 0} TRX
+            Total Struk: {data.kpiData?.transaction_count || 0} TRX
           </p>
         </div>
-
-        {/* CARD 2: NET PROFIT (BERSIH) */}
         <div className="bg-red-600 border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between text-white">
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-white/70 mb-2">
             // NET_PROFIT (LABA BERSIH)
           </h3>
           <div className="text-3xl lg:text-3xl font-black break-words">
-            {formatRupiah(kpiData?.net_profit)}
+            {formatRupiah(data.kpiData?.net_profit)}
           </div>
           <p className="text-[10px] font-bold text-white/70 mt-2 uppercase tracking-widest">
             Uang yang bisa dicairkan
           </p>
         </div>
-
-        {/* CARD 3: PROFIT MARGIN */}
         <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between">
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
             // PROFIT_MARGIN (%)
           </h3>
           <div className="flex items-end gap-3">
             <div className="text-4xl lg:text-5xl font-black text-black">
-              {kpiData?.profit_margin || 0}%
+              {data.kpiData?.profit_margin || 0}%
             </div>
-            {/* Indikator Status Kesehatan Bisnis */}
             <div
-              className={`px-3 py-1 mb-1 text-xs font-black uppercase border-2 border-black ${
-                Number(kpiData?.profit_margin) >= 40
-                  ? 'bg-green-400'
-                  : Number(kpiData?.profit_margin) >= 20
-                    ? 'bg-yellow-400 text-black'
-                    : 'bg-red-400 text-white'
-              }`}
+              className={`px-3 py-1 mb-1 text-xs font-black uppercase border-2 border-black ${Number(data.kpiData?.profit_margin) >= 40 ? 'bg-green-400' : Number(data.kpiData?.profit_margin) >= 20 ? 'bg-yellow-400 text-black' : 'bg-red-400 text-white'}`}
             >
-              {Number(kpiData?.profit_margin) >= 40
+              {Number(data.kpiData?.profit_margin) >= 40
                 ? 'HEALTHY'
-                : Number(kpiData?.profit_margin) >= 20
+                : Number(data.kpiData?.profit_margin) >= 20
                   ? 'WARNING'
                   : 'CRITICAL'}
             </div>
           </div>
           <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
-            Modal/COGS: {formatRupiah(kpiData?.total_cogs)}
+            Modal/COGS: {formatRupiah(data.kpiData?.total_cogs)}
           </p>
         </div>
       </div>
 
-      {/* CHART */}
-      {/* <div className="p-4 md:p-6 mb-8 bg-white border-2 border-black shadow-[6px_6px_0px_#000000]">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <h3 className="text-xs font-black italic uppercase tracking-[0.2em] flex items-center gap-2">
-              <Layers size={16} className="text-red-600" /> //{' '}
-              {chartData?.title || 'SYNCING...'}
-            </h3>
-            {chartPeriod === 'month' && (
-              <button
-                onClick={handleBackToYear}
-                className="flex items-center gap-1 bg-black text-white px-3 py-1 text-[9px] font-black uppercase hover:bg-red-600 shadow-[2px_2px_0px_#444]"
-              >
-                <ArrowLeft size={12} /> BACK
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="h-[300px] md:h-[400px] w-full relative">
-          {loadChart ? (
-            <div className="w-full h-full flex items-center justify-center font-black animate-pulse text-xs text-gray-400">
-              SYNCING_DATA...
-            </div>
-          ) : (
-            <SalesChart
-              labels={chartData?.labels || []}
-              datasets={chartData?.datasets || []}
-              onPointClick={(idx) => {
-                if (chartPeriod === 'year') {
-                  setChartPeriod('month');
-                  setSelectedMonthIndex(idx);
-                }
-              }}
-              onLegendChange={setHiddenCategories}
-            />
-          )}
-        </div>
-      </div> */}
-
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
-        {/* LINE CHART (Kiri - 3 Kolom) */}
         <div className="lg:col-span-3 p-4 md:p-8 bg-white border-2 border-black shadow-[6px_6px_0px_#000000]">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xs font-black italic tracking-[0.2em] uppercase">
               // REVENUE_TREND
             </h3>
-            {chartPeriod === 'month' && (
+            {state.chartPeriod === 'month' && (
               <button
-                onClick={handleBackToYear}
+                onClick={handlers.handleBackToYear}
                 className="bg-black text-white px-3 py-1 text-[9px] font-black uppercase shadow-[2px_2px_0px_#444]"
               >
                 BACK
@@ -307,45 +234,43 @@ export default function Dashboard() {
           </div>
           <div className="h-[350px]">
             <SalesChart
-              labels={chartData?.labels || []}
-              datasets={chartData?.datasets || []}
-              onPointClick={handleChartClick}
-              onLegendChange={setHiddenCategories}
+              labels={data.chartData?.labels || []}
+              datasets={data.chartData?.datasets || []}
+              onPointClick={handlers.handleChartClick}
+              onLegendChange={setters.setHiddenCategories}
             />
           </div>
         </div>
-
-        {/* DONUT CHART (Kanan - 1 Kolom) */}
-        {/* DONUT CHART (Kanan - 1 Kolom) */}
         <div className="p-4 md:p-8 bg-white border-2 border-black shadow-[6px_6px_0px_#000000] flex flex-col h-full">
-          {/* UBAH JUDUL DI SINI */}
           <h3 className="text-xs font-black italic tracking-[0.2em] uppercase mb-8">
             VOLUME_COMPOSITION
           </h3>
           <div className="flex-grow">
-            {donutData ? (
-              <CategoryDonutChart data={donutData} />
+            {data.donutData ? (
+              <CategoryDonutChart data={data.donutData} />
             ) : (
               <div className="animate-pulse bg-gray-100 h-full w-full"></div>
             )}
           </div>
-          {/* UBAH DESKRIPSI DI BAWAH DI SINI */}
           <p className="text-[8px] text-gray-400 font-bold mt-4 text-center leading-relaxed italic">
             *Berdasarkan jumlah unit produk terjual (PCS)
           </p>
         </div>
       </div>
 
-      {/* ADVANCED ANALYTICS ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* HEATMAP: PEAK HOURS */}
         <div className="lg:col-span-1 bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col">
           <h3 className="text-xs font-black italic tracking-[0.2em] mb-4 uppercase">
             // PEAK_HOURS (Heatmap)
           </h3>
           <div className="flex-grow flex items-center">
-            {advData?.peak_hours ? (
-              <PeakHoursHeatmap data={advData.peak_hours} />
+            {data.advData?.peak_hours ? (
+              <PeakHoursHeatmap
+                data={data.advData.peak_hours}
+                onCellClick={(day, hour) =>
+                  setters.setPeakDrillDown({ day, hour })
+                }
+              />
             ) : (
               <div className="animate-pulse h-full w-full bg-gray-100"></div>
             )}
@@ -354,37 +279,32 @@ export default function Dashboard() {
             Warna merah pekat menandakan antrean kasir tertinggi.
           </p>
         </div>
-
-        {/* BAR CHART: DAILY REVENUE */}
         <div className="lg:col-span-1 bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
           <h3 className="text-xs font-black italic tracking-[0.2em] mb-4 uppercase">
             // DAILY_REVENUE (Avg)
           </h3>
           <div className="h-[250px]">
-            {advData?.daily_revenue && (
-              <DailyBarChart data={advData.daily_revenue} />
+            {data.advData?.daily_revenue && (
+              <DailyBarChart data={data.advData.daily_revenue} />
             )}
           </div>
         </div>
-
-        {/* STACKED BAR: CATEGORY TREND */}
         <div className="lg:col-span-1 bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
           <h3 className="text-xs font-black italic tracking-[0.2em] mb-4 uppercase">
             // CATEGORY_STACK_TREND
           </h3>
           <div className="h-[250px]">
-            {advData?.stacked_trend && chartData?.labels && (
+            {data.advData?.stacked_trend && data.chartData?.labels && (
               <StackedCategoryChart
-                data={advData.stacked_trend}
-                period={chartPeriod}
-                labels={chartData.labels}
+                data={data.advData.stacked_trend}
+                period={state.chartPeriod}
+                labels={data.chartData.labels}
               />
             )}
           </div>
         </div>
       </div>
 
-      {/* MARKET BASKET (BUNDLING RECOMMENDATIONS) */}
       <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] mb-8">
         <h3 className="text-xs font-black italic tracking-[0.2em] mb-2 uppercase flex items-center gap-2">
           // BUNDLING_SUGGESTIONS{' '}
@@ -394,38 +314,39 @@ export default function Dashboard() {
         </h3>
         <p className="text-[10px] text-gray-500 font-bold mb-6">
           Sistem mendeteksi pasangan produk yang paling sering dibeli dalam 1
-          struk yang sama. Gunakan data ini untuk membuat Promo Paket.
+          struk. Gunakan data ini untuk membuat Promo Paket.
         </p>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {advData?.market_basket?.length > 0 ? (
-            advData.market_basket.map((pair: any, idx: number) => (
-              <div
-                key={idx}
-                className="border-2 border-gray-200 hover:border-black p-4 transition-colors group cursor-default flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-black uppercase text-red-600 mb-1">
-                    Pasangan #{idx + 1}
+          {data.advData?.market_basket?.length > 0 ? (
+            data.advData.market_basket.map(
+              (pair: MarketBasketPair, idx: number) => (
+                <div
+                  key={idx}
+                  className="border-2 border-gray-200 hover:border-black p-4 transition-colors group cursor-default flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="text-[10px] font-black uppercase text-red-600 mb-1">
+                      Pasangan #{idx + 1}
+                    </div>
+                    <div className="font-black text-xs break-words">
+                      {pair.product_a}
+                    </div>
+                    <div className="text-gray-400 font-black my-1 text-[10px]">
+                      +
+                    </div>
+                    <div className="font-black text-xs break-words">
+                      {pair.product_b}
+                    </div>
                   </div>
-                  <div className="font-black text-xs break-words">
-                    {pair.product_a}
-                  </div>
-                  <div className="text-gray-400 font-black my-1 text-[10px]">
-                    +
-                  </div>
-                  <div className="font-black text-xs break-words">
-                    {pair.product_b}
+                  <div className="mt-4 pt-3 border-t-2 border-dashed border-gray-200 group-hover:border-black">
+                    <div className="text-[20px] font-black">
+                      {pair.times_bought_together}{' '}
+                      <span className="text-[10px]">STRUK</span>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-4 pt-3 border-t-2 border-dashed border-gray-200 group-hover:border-black">
-                  <div className="text-[20px] font-black">
-                    {pair.times_bought_together}{' '}
-                    <span className="text-[10px]">STRUK</span>
-                  </div>
-                </div>
-              </div>
-            ))
+              ),
+            )
           ) : (
             <div className="col-span-full py-8 text-center text-gray-400 font-black italic text-xs">
               MENGUMPULKAN DATA KORELASI...
@@ -434,11 +355,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 3-COLUMN GRID: RECENT TRX (2) & INVENTORY (1) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* RECENT TRX & TOP PRODUCTS */}
         <div className="lg:col-span-2 space-y-8">
-          {/* LATEST TRANSACTIONS */}
           <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
             <h3 className="text-xs font-black italic tracking-[0.2em] mb-6 uppercase">
               // Drill_Down_Logs (Recent 10)
@@ -452,13 +370,13 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/10">
-                  {tableData?.latestTrx?.length > 0 ? (
-                    tableData.latestTrx.map((trx: any) => (
+                  {data.tableData?.latestTrx?.length > 0 ? (
+                    data.tableData.latestTrx.map((trx: any) => (
                       <tr
                         key={trx.id}
                         onClick={() => {
-                          setSelectedTrxId(trx.id);
-                          setIsModalOpen(true);
+                          setters.setSelectedTrxId(trx.id);
+                          setters.setIsModalOpen(true);
                         }}
                         className="hover:bg-red-50 cursor-pointer group"
                       >
@@ -484,8 +402,6 @@ export default function Dashboard() {
               </table>
             </div>
           </div>
-
-          {/* TOP PRODUCTS */}
           <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
             <h3 className="text-xs font-black italic tracking-[0.2em] mb-6 uppercase">
               // Top_Selling_Items
@@ -500,20 +416,22 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/10">
-                  {tableData?.topProducts?.length > 0 ? (
-                    tableData.topProducts.map((item: any, i: number) => (
-                      <tr key={i} className="hover:bg-red-50 group">
-                        <td className="p-3 truncate max-w-[150px]">
-                          {item.name}
-                        </td>
-                        <td className="p-3 text-center text-gray-500">
-                          {item.total_qty} PCS
-                        </td>
-                        <td className="p-3 text-right">
-                          {formatRupiah(item.total_revenue)}
-                        </td>
-                      </tr>
-                    ))
+                  {data.tableData?.topProducts?.length > 0 ? (
+                    data.tableData.topProducts.map(
+                      (item: TopProduct, i: number) => (
+                        <tr key={i} className="hover:bg-red-50 group">
+                          <td className="p-3 truncate max-w-[150px]">
+                            {item.name}
+                          </td>
+                          <td className="p-3 text-center text-gray-500">
+                            {item.total_qty} PCS
+                          </td>
+                          <td className="p-3 text-right">
+                            {formatRupiah(item.total_revenue)}
+                          </td>
+                        </tr>
+                      ),
+                    )
                   ) : (
                     <tr>
                       <td
@@ -530,7 +448,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* INVENTORY ALERTS */}
         <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] h-fit">
           <div className="flex items-center gap-2 mb-6 text-red-600">
             <AlertTriangle size={18} className="animate-pulse" />
@@ -539,17 +456,17 @@ export default function Dashboard() {
             </h3>
           </div>
           <div className="space-y-4">
-            {inventoryAlerts.length > 0 ? (
-              inventoryAlerts.map((item: any, i: number) => (
+            {data.inventoryAlerts.length > 0 ? (
+              data.inventoryAlerts.map((item: InventoryAlert, i: number) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center p-3 border-2 border-red-600/20 bg-red-50/50 hover:bg-red-100 transition-colors cursor-default"
+                  className="flex justify-between items-center p-3 border-2 border-red-600/20 bg-red-50/50 cursor-default"
                 >
                   <span className="text-[10px] font-black truncate max-w-[120px]">
-                    {item.name}
+                    {item.item_name}
                   </span>
                   <span className="text-[10px] font-black text-red-600 bg-white px-2 border-2 border-red-600">
-                    {item.stock}{' '}
+                    {item.current_stock}{' '}
                     <span className="text-[8px] text-gray-500">
                       {item.unit || 'PCS'}
                     </span>

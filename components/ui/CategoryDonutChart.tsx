@@ -8,6 +8,7 @@ import {
   Plugin,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { CHART_COLORS } from '@/lib/constants'; // <-- Gunakan constant global
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -17,21 +18,13 @@ interface DonutProps {
 
 export default function CategoryDonutChart({ data }: DonutProps) {
   const totalQty = data.reduce((sum, item) => sum + Number(item.value), 0);
-  const colorPalette = [
-    '#dc2626',
-    '#2563eb',
-    '#16a34a',
-    '#ca8a04',
-    '#7c3aed',
-    '#db2777',
-  ];
 
   const chartData = {
     labels: data.map((d) => d.label.toUpperCase()),
     datasets: [
       {
         data: data.map((d) => Number(d.value)),
-        backgroundColor: colorPalette,
+        backgroundColor: CHART_COLORS, // <-- Otomatis memanggil warna dari constant
         borderColor: '#fff',
         borderWidth: 4,
         hoverOffset: 10,
@@ -63,53 +56,47 @@ export default function CategoryDonutChart({ data }: DonutProps) {
         },
       },
     },
-    cutout: '70%', // Diperbesar sedikit agar lubang lega untuk teks
+    cutout: '65%',
   };
 
-  // --- PLUGIN KANVAS (DIGABUNG) ---
   const customCanvasDrawings: Plugin<'doughnut'> = {
     id: 'customCanvasDrawings',
     afterDraw: (chart) => {
       const ctx = chart.ctx;
       const meta = chart.getDatasetMeta(0);
-
-      // Ambil kordinat X dan Y tepat di titik poros tengah Donut Chart
       const centerX = meta.data[0]?.x;
       const centerY = meta.data[0]?.y;
 
-      // 1. GAMBAR TEKS TOTAL DI TENGAH LUBANG
+      const isMobile = chart.width < 250;
+      const titleFontSize = isMobile ? 8 : 9;
+      const numberFontSize = isMobile ? 12 : 16;
+      const percentFontSize = isMobile ? 9 : 12;
+
       if (centerX && centerY && totalQty > 0) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-
-        // Teks "TOTAL VOLUME"
-        ctx.font = '900 9px Montserrat, sans-serif';
-        ctx.fillStyle = '#9ca3af'; // Warna abu-abu
-        ctx.fillText('TOTAL VOLUME', centerX, centerY - 10);
-
-        // Teks Angka "XXX PCS"
-        ctx.font = '900 14px Montserrat, sans-serif';
-        ctx.fillStyle = '#000000'; // Warna hitam
+        ctx.font = `900 ${titleFontSize}px Montserrat, sans-serif`;
+        ctx.fillStyle = '#9ca3af';
+        ctx.fillText('TOTAL VOLUME', centerX, centerY - (isMobile ? 8 : 12));
+        ctx.font = `900 ${numberFontSize}px Montserrat, sans-serif`;
+        ctx.fillStyle = '#000000';
         ctx.fillText(
           `${totalQty.toLocaleString('id-ID')} PCS`,
           centerX,
-          centerY + 10,
+          centerY + (isMobile ? 8 : 12),
         );
       }
 
-      // 2. GAMBAR PERSENTASE DI ATAS POTONGAN WARNA
       chart.data.datasets.forEach((dataset, i) => {
         const currentMeta = chart.getDatasetMeta(i);
         currentMeta.data.forEach((element: any, index) => {
           const value = dataset.data[index] as number;
-
           if (value > 0 && totalQty > 0) {
             const percentage = (value / totalQty) * 100;
-            if (percentage > 4) {
-              // Jangan gambar kalau persentase terlalu kecil
+            if (percentage > 5) {
               const { x, y } = element.tooltipPosition();
               ctx.fillStyle = '#ffffff';
-              ctx.font = 'bold 11px Montserrat, sans-serif';
+              ctx.font = `bold ${percentFontSize}px Montserrat, sans-serif`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               ctx.shadowColor = 'rgba(0,0,0,0.5)';
@@ -125,8 +112,7 @@ export default function CategoryDonutChart({ data }: DonutProps) {
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center pb-2">
-      {/* HTML Absolute DIV sudah dibuang sepenuhnya agar bersih */}
+    <div className="relative w-full h-[300px] md:h-full flex items-center justify-center pb-2">
       <Doughnut
         data={chartData}
         options={options}
