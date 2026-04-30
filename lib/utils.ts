@@ -7,3 +7,10 @@ export const formatRupiah = (number: string | number) => {
     maximumFractionDigits: 0,
   }).format(Number(number) || 0);
 };
+
+export const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleString('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+};

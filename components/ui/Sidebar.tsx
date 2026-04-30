@@ -1,10 +1,11 @@
+'use client';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
-import api from '@/lib/axios';
-import Cookies from 'js-cookie';
-// Tambahkan import icon baru dari lucide-react:
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth'; // <-- Panggil otak Auth-nya
+
 import {
   Menu,
   X,
@@ -18,11 +19,10 @@ import {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // State khusus untuk mobile menu
 
-  // 1. Tambahkan State untuk mengontrol Modal Logout
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  // Panggil logika dari Custom Hook
+  const { state, setters, handlers } = useAuth();
 
   const navItems = [
     {
@@ -52,55 +52,17 @@ export default function Sidebar() {
     },
   ];
 
-  // 2. Fungsi eksekusi Logout HANYA berjalan jika sudah dikonfirmasi
-  const executeLogout = async () => {
-    // 1. Langsung tutup modal biar UI merespons
-    setIsLogoutModalOpen(false);
-
-    try {
-      // 2. Beri waktu backend untuk membalas (PENTING untuk Sanctum/HttpOnly)
-      // Kita pakai trik Promise.race agar maksimal nunggu 2 detik saja (anti-nyangkut)
-      await Promise.race([
-        api.post('/logout'),
-        new Promise((resolve) => setTimeout(resolve, 2000)),
-      ]);
-    } catch (error) {
-      console.log('Backend timeout/error, forcing local clear...');
-    }
-
-    // 3. NUKE SEMUA COOKIE (Meniru cara kerja F12)
-    // Kita looping semua cookie yang ada dan hancurkan dari segala jalur (path & domain)
-    const allCookies = Cookies.get();
-    for (const cookieName in allCookies) {
-      Cookies.remove(cookieName); // Coba hapus biasa
-      Cookies.remove(cookieName, { path: '/' }); // Coba hapus di root path
-      Cookies.remove(cookieName, {
-        path: '/',
-        domain: window.location.hostname,
-      }); // Coba hapus di level domain
-    }
-
-    // 4. Hapus semua data di Local Storage
-    localStorage.clear();
-
-    // 5. Tendang ke halaman login dengan hard redirect
-    window.location.replace('/login');
-  };
-
   const handleNavClick = () => setIsOpen(false);
 
   return (
     <>
-      {/* 3. KOMPONEN CONFIRMATION MODAL LOGOUT */}
-      {isLogoutModalOpen && (
+      {/* MODAL LOGOUT */}
+      {state.isLogoutModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Overlay Gelap */}
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setIsLogoutModalOpen(false)}
+            onClick={() => setters.setIsLogoutModalOpen(false)}
           ></div>
-
-          {/* KOTAK MODAL (Tambahkan z-10 di sini) */}
           <div className="relative z-10 bg-white border-4 border-black w-full max-w-sm shadow-[8px_8px_0px_#dc2626] p-6 animate-in fade-in zoom-in duration-200">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle size={24} className="text-red-600" />
@@ -108,21 +70,19 @@ export default function Sidebar() {
                 Terminate_Session?
               </h2>
             </div>
-
             <p className="text-xs font-bold text-gray-600 mb-6 uppercase tracking-wider">
               Are you sure you want to disconnect from DOM Social Hub?
             </p>
-
             <div className="flex gap-4">
               <button
-                onClick={() => setIsLogoutModalOpen(false)}
+                onClick={() => setters.setIsLogoutModalOpen(false)}
                 type="button"
                 className="flex-1 bg-gray-200 text-black p-3 font-black uppercase text-[10px] tracking-widest hover:bg-gray-300 transition-colors border-2 border-transparent hover:border-black"
               >
                 Cancel
               </button>
               <button
-                onClick={executeLogout}
+                onClick={handlers.executeLogout}
                 type="button"
                 className="flex-1 bg-black text-white p-3 font-black uppercase text-[10px] tracking-widest hover:bg-red-600 transition-colors shadow-[4px_4px_0px_#444] hover:shadow-[4px_4px_0px_#dc2626]"
               >
@@ -162,9 +122,7 @@ export default function Sidebar() {
 
       {/* SIDEBAR UTAMA */}
       <aside
-        className={`w-64 bg-black border-r border-red-900/30 h-[100dvh] fixed left-0 top-0 flex flex-col z-50 font-montserrat transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-        md:translate-x-0`}
+        className={`w-64 bg-black border-r border-red-900/30 h-[100dvh] fixed left-0 top-0 flex flex-col z-50 font-montserrat transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       >
         <div className="p-8 border-b border-red-900/20 relative overflow-hidden flex flex-col items-center">
           <div className="scanline"></div>
@@ -191,23 +149,16 @@ export default function Sidebar() {
                 key={item.name}
                 href={item.path}
                 onClick={handleNavClick}
-                className={`group flex items-center gap-4 px-4 py-3 transition-all duration-300 relative ${
-                  isActive
-                    ? 'text-red-500 font-black'
-                    : 'text-gray-500 hover:text-white'
-                }`}
+                className={`group flex items-center gap-4 px-4 py-3 transition-all duration-300 relative ${isActive ? 'text-red-500 font-black' : 'text-gray-500 hover:text-white'}`}
               >
                 {isActive && (
                   <div className="absolute left-0 w-1 h-2/3 bg-red-600 shadow-[0_0_15px_rgba(220,38,38,1)]"></div>
                 )}
-
-                {/* UBAH BAGIAN INI: Tidak pakai grayscale lagi, tapi atur opacity & color SVG */}
                 <span
                   className={`transition-colors ${isActive ? 'text-red-500' : 'text-gray-500 group-hover:text-white'}`}
                 >
                   {item.icon}
                 </span>
-
                 <span className="uppercase tracking-widest text-[11px]">
                   {item.name}
                 </span>
@@ -230,10 +181,8 @@ export default function Sidebar() {
               </p>
             </div>
           </div>
-
-          {/* 4. Ubah fungsi tombol untuk membuka modal, BUKAN langsung logout */}
           <button
-            onClick={() => setIsLogoutModalOpen(true)}
+            onClick={() => setters.setIsLogoutModalOpen(true)}
             type="button"
             className="w-full text-left px-4 py-2 text-[10px] font-black text-gray-500 hover:text-red-500 uppercase tracking-[0.2em] transition-colors"
           >

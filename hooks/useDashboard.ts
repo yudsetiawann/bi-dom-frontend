@@ -73,14 +73,12 @@ export function useDashboard() {
   });
 
   const { data: inventoryAlerts = [] } = useQuery({
-    queryKey: ['inventoryAlerts'],
-    queryFn: async () => {
-      // 1. Tembak langsung ke pintu algoritma SMA milik modul Inventory
-      const res = await api.get('/inventory/alerts');
-      const allAlerts = res.data.data.inventory_alerts;
-
-      // 2. Filter! Dashboard HANYA menampilkan yang berstatus "Kritis"
-      return allAlerts.filter((item: any) => item.status === 'Kritis');
+    queryKey: ['inventoryAlerts'], // Menggunakan cache yang sama dengan halaman Inventory
+    queryFn: async () => (await api.get('/inventory/alerts')).data.data,
+    // Gunakan fungsi SELECT untuk mem-filter data dari cache TANPA merusak struktur aslinya
+    select: (data) => {
+      const alerts = data?.inventory_alerts || [];
+      return alerts.filter((item: any) => item.status === 'Kritis');
     },
   });
 
