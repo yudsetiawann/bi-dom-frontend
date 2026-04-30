@@ -1,6 +1,6 @@
 'use client';
 import { X, Receipt, FileText } from 'lucide-react';
-import { formatRupiah } from '@/lib/utils'; // <-- Memanggil fungsi global
+import { formatRupiah, formatDate } from '@/lib/utils';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -65,8 +65,11 @@ export default function TransactionModal({
                   <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
                     Timestamp
                   </p>
+                  {/* UBAH BARIS DI BAWAH INI 👇 */}
                   <p className="text-xs font-bold text-black">
-                    {data.transaction?.trx_date}
+                    {data.transaction?.created_at
+                      ? formatDate(data.transaction.created_at)
+                      : '-'}
                   </p>
                 </div>
               </div>
