@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // <-- Tambahkan useEffect di sini
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import api from '@/lib/axios';
@@ -13,17 +13,40 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // 👉 RANJAU PEMBERSIH: Hancurkan semua sesi hantu saat halaman ini dibuka
+  useEffect(() => {
+    Cookies.remove('auth_token');
+    Cookies.remove('auth_token', { path: '/' });
+    Cookies.remove('user_role');
+    Cookies.remove('user_role', { path: '/' });
+    Cookies.remove('user_name');
+    Cookies.remove('user_name', { path: '/' });
+    localStorage.clear();
+  }, []);
+
   const loginMutation = useMutation({
     mutationFn: async (credentials: any) => {
       const response = await api.post('/login', credentials);
       return response.data;
     },
     onSuccess: (data) => {
+      // 1. Simpan Token
       Cookies.set('auth_token', data.data.token, { expires: 1 });
+
+      // 2. Simpan Role & Nama (Asumsi struktur response: data.data.user.role)
+      Cookies.set('user_role', data.data.user.role, { expires: 1 });
+      Cookies.set('user_name', data.data.user.name, { expires: 1 });
+
       toast.success('ACCESS_GRANTED', {
         description: 'Autentikasi berhasil. Selamat datang di sistem.',
       });
-      router.push('/');
+
+      // 3. Redirect berdasarkan Role
+      if (data.data.user.role === 'manager') {
+        router.push('/');
+      } else {
+        router.push('/invoices'); // Kasir langsung lempar ke Invoices
+      }
     },
     onError: (error: any) => {
       toast.error('ACCESS_DENIED', {

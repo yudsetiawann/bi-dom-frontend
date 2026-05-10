@@ -1,10 +1,26 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { useProducts } from '@/hooks/useProducts';
 import { Plus, Trash2, Save, Coffee, Tag, Edit2, X } from 'lucide-react';
 
 export default function MasterProduct() {
   const { state, setters, data, mutations, handlers } = useProducts();
+
+  // --- FRAMER MOTION VARIANTS ---
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 260, damping: 20 },
+    },
+  };
 
   if (data.isLoading) {
     return (
@@ -25,9 +41,15 @@ export default function MasterProduct() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* FORM KIRI (ADD / EDIT) */}
-        <div
+        <motion.div
+          variants={itemVariants}
           className={`border-2 border-black p-6 transition-all ${state.editingId ? 'bg-red-50 shadow-[8px_8px_0px_#dc2626]' : 'bg-white shadow-[8px_8px_0px_#000000]'}`}
         >
           <div className="flex justify-between items-center mb-6">
@@ -155,10 +177,13 @@ export default function MasterProduct() {
                   : 'REGISTER_PRODUCT'}
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* LIST KANAN (EXISTING MENU) */}
-        <div className="bg-white border-2 border-black p-6 shadow-[8px_8px_0px_#dc2626]">
+        <motion.div
+          variants={itemVariants}
+          className="bg-white border-2 border-black p-6 shadow-[8px_8px_0px_#dc2626]"
+        >
           <h3 className="text-xs font-black italic tracking-widest uppercase mb-6 flex items-center gap-2">
             <Coffee size={16} /> // Existing_Menu
           </h3>
@@ -207,8 +232,8 @@ export default function MasterProduct() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </main>
   );
 }

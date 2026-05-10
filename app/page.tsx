@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { useDashboard } from '@/hooks/useDashboard';
 import { formatRupiah } from '@/lib/utils';
 import {
@@ -22,6 +23,21 @@ import { AlertTriangle } from 'lucide-react';
 export default function Dashboard() {
   // Panggil Custom Hook!
   const { state, setters, data, loaders, handlers } = useDashboard();
+
+  // --- FRAMER MOTION VARIANTS ---
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 260, damping: 20 },
+    },
+  };
 
   return (
     <main className="p-4 md:p-8 max-w-7xl mx-auto font-montserrat min-h-screen pb-20">
@@ -166,8 +182,16 @@ export default function Dashboard() {
       </header>
 
       {/* KPI SUMMARY CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-2">
-        <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between">
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-2"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div
+          variants={itemVariants}
+          className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
+        >
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
             // GROSS_REVENUE (
             {state.chartPeriod === 'year'
@@ -181,8 +205,12 @@ export default function Dashboard() {
           <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
             Total Struk: {data.kpiData?.transaction_count || 0} TRX
           </p>
-        </div>
-        <div className="bg-red-600 border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between text-white">
+        </motion.div>
+
+        <motion.div
+          variants={itemVariants}
+          className="bg-red-600 border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between text-white"
+        >
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-white/70 mb-2">
             // NET_PROFIT (LABA BERSIH)
           </h3>
@@ -192,8 +220,12 @@ export default function Dashboard() {
           <p className="text-[10px] font-bold text-white/70 mt-2 uppercase tracking-widest">
             Uang yang bisa dicairkan
           </p>
-        </div>
-        <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between">
+        </motion.div>
+
+        <motion.div
+          variants={itemVariants}
+          className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
+        >
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
             // PROFIT_MARGIN (%)
           </h3>
@@ -214,10 +246,15 @@ export default function Dashboard() {
           <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
             Modal/COGS: {formatRupiah(data.kpiData?.total_cogs)}
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, type: 'spring' }}
+      >
         <div className="lg:col-span-3 p-4 md:p-8 bg-white border-2 border-black shadow-[6px_6px_0px_#000000]">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xs font-black italic tracking-[0.2em] uppercase">
@@ -256,9 +293,14 @@ export default function Dashboard() {
             *Berdasarkan jumlah unit produk terjual (PCS)
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, type: 'spring' }}
+      >
         <div className="lg:col-span-1 bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col">
           <h3 className="text-xs font-black italic tracking-[0.2em] mb-4 uppercase">
             // PEAK_HOURS (Heatmap)
@@ -303,9 +345,14 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] mb-8">
+      <motion.div
+        className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] mb-8"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, type: 'spring' }}
+      >
         <h3 className="text-xs font-black italic tracking-[0.2em] mb-2 uppercase flex items-center gap-2">
           // BUNDLING_SUGGESTIONS{' '}
           <span className="bg-red-600 text-white px-2 py-0.5 text-[8px] not-italic">
@@ -353,9 +400,14 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, type: 'spring' }}
+      >
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
             <h3 className="text-xs font-black italic tracking-[0.2em] mb-6 uppercase">
@@ -480,7 +532,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </main>
   );
 }

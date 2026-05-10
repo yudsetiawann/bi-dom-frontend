@@ -1,18 +1,23 @@
 // hooks/useAuth.ts
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
 
 export function useAuth() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+
+  // Ambil data user dari cookies saat komponen di-load
+  useEffect(() => {
+    setUserRole(Cookies.get('user_role') || null);
+    setUserName(Cookies.get('user_name') || null);
+  }, []);
 
   const executeLogout = async () => {
-    // 1. Langsung tutup modal biar UI merespons cepat
     setIsLogoutModalOpen(false);
 
     try {
-      // 2. Beri waktu backend untuk membalas (maksimal 2 detik)
       await Promise.race([
         api.post('/logout'),
         new Promise((resolve) => setTimeout(resolve, 2000)),
@@ -21,7 +26,6 @@ export function useAuth() {
       console.log('Backend timeout/error, forcing local clear...');
     }
 
-    // 3. NUKE SEMUA COOKIE (Meniru cara kerja F12)
     const allCookies = Cookies.get();
     for (const cookieName in allCookies) {
       Cookies.remove(cookieName);
@@ -32,13 +36,12 @@ export function useAuth() {
       });
     }
 
-    // 4. Hapus Local Storage & Tendang ke Login
     localStorage.clear();
     window.location.replace('/login');
   };
 
   return {
-    state: { isLogoutModalOpen },
+    state: { isLogoutModalOpen, userRole, userName }, // <- Sekarang role & name bisa dipakai
     setters: { setIsLogoutModalOpen },
     handlers: { executeLogout },
   };

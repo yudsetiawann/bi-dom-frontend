@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth'; // <-- Panggil otak Auth-nya
+import { useAuth } from '@/hooks/useAuth';
 
 import {
   Menu,
@@ -19,10 +19,13 @@ import {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false); // State khusus untuk mobile menu
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Panggil logika dari Custom Hook
+  // Panggil hook Auth untuk mendapatkan nama dan role
   const { state, setters, handlers } = useAuth();
+
+  // Jika sedang di halaman login, jangan render Sidebar (Bypass)
+  if (pathname === '/login') return null;
 
   const navItems = [
     {
@@ -52,7 +55,33 @@ export default function Sidebar() {
     },
   ];
 
+  // 👉 LOGIKA PENYEMBUNYIAN MENU (FILTERING)
+  const filteredNavItems = navItems.filter((item) => {
+    // Kalau belum ke-load, sembunyikan semua dulu biar aman
+    if (!state.userRole) return false;
+
+    // Manager lihat semua
+    if (state.userRole === 'manager') return true;
+
+    // Kasir HANYA lihat Import Data dan Invoice
+    if (state.userRole === 'kasir') {
+      return ['/import', '/invoices'].includes(item.path);
+    }
+
+    return false;
+  });
+
   const handleNavClick = () => setIsOpen(false);
+
+  // 👉 FUNGSI UNTUK MENGAMBIL HURUF DEPAN NAMA (Misal: "Staff Kasir" -> "SK")
+  const getInitials = (name: string | null) => {
+    if (!name) return '??';
+    const words = name.split(' ');
+    if (words.length > 1) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   return (
     <>
@@ -112,7 +141,6 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* BACKDROP OVERLAY SIDEBAR MOBILE */}
       {isOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/80 z-30 backdrop-blur-sm"
@@ -142,7 +170,8 @@ export default function Sidebar() {
         </div>
 
         <nav className="flex-1 p-4 space-y-2 mt-2 overflow-y-auto">
-          {navItems.map((item) => {
+          {/* 👉 Render Menu yang Sudah Difilter (Bukan navItems asli) */}
+          {filteredNavItems.map((item) => {
             const isActive = pathname === item.path;
             return (
               <Link
@@ -167,17 +196,18 @@ export default function Sidebar() {
           })}
         </nav>
 
+        {/* 👉 PROFIL DINAMIS DI SINI */}
         <div className="p-4 border-t border-red-900/20 space-y-4 bg-black shrink-0">
           <div className="bg-red-900/10 border border-red-900/30 p-4 flex items-center gap-3">
             <div className="w-8 h-8 min-w-[32px] bg-red-600 flex items-center justify-center text-white font-black text-xs shadow-[0_0_10px_rgba(220,38,38,0.5)]">
-              SH
+              {getInitials(state.userName)}
             </div>
             <div className="overflow-hidden">
               <p className="text-[11px] font-black text-white truncate uppercase tracking-tighter">
-                Sofyan Haris
+                {state.userName || 'Loading...'}
               </p>
               <p className="text-[9px] text-red-500 font-bold tracking-widest uppercase">
-                Manager
+                {state.userRole || 'Verifying'}
               </p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { useInventory } from '@/hooks/useInventory';
 import {
   AlertTriangle,
@@ -11,6 +12,21 @@ import {
 
 export default function InventoryAlert() {
   const { state, setters, data, mutations, handlers } = useInventory();
+
+  // --- FRAMER MOTION VARIANTS ---
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 260, damping: 20 },
+    },
+  };
 
   if (data.isLoading) {
     return (
@@ -37,9 +53,17 @@ export default function InventoryAlert() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* TABEL STOK (KIRI) */}
-        <div className="lg:col-span-2 bg-white border-2 border-black p-4 md:p-8 shadow-[6px_6px_0px_#000000]">
+        <motion.div
+          variants={itemVariants}
+          className="lg:col-span-2 bg-white border-2 border-black p-4 md:p-8 shadow-[6px_6px_0px_#000000]"
+        >
           <h3 className="text-[10px] md:text-xs font-black italic tracking-[0.2em] md:tracking-[0.3em] uppercase mb-6 md:mb-8">
             // Material_Live_Monitoring
           </h3>
@@ -88,10 +112,10 @@ export default function InventoryAlert() {
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
 
         {/* SIDEBAR FORMS (KANAN) */}
-        <div className="space-y-6 md:space-y-8">
+        <motion.div variants={itemVariants} className="space-y-6 md:space-y-8">
           {/* FORM: INBOUND STOCK */}
           <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
             <div className="flex items-center gap-2 mb-6">
@@ -185,13 +209,11 @@ export default function InventoryAlert() {
                 />
               </div>
               <div className="bg-gray-100 p-3 border-l-4 border-black relative">
-                {/* Gunakan class 'group' dan 'cursor-help' di sini */}
                 <div className="flex items-center gap-2 mb-2 text-black/50 w-fit cursor-help group">
                   <Info size={12} />
                   <span className="text-[9px] font-black uppercase border-b border-dashed border-black/30">
                     SMA Config
                   </span>
-
                   {/* TOOLTIP POPUP (Muncul saat di-hover) */}
                   <div className="absolute bottom-full left-0 mb-2 w-64 bg-black text-white p-4 text-[10px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-[4px_4px_0px_#dc2626] pointer-events-none">
                     <p className="text-red-500 font-black mb-1 tracking-widest uppercase text-xs">
@@ -208,11 +230,9 @@ export default function InventoryAlert() {
                       bahan akan habis (Status Kritis) berdasarkan tren
                       penjualan.
                     </p>
-                    {/* Segitiga panah ke bawah */}
                     <div className="absolute top-full left-6 -mt-1 border-4 border-transparent border-t-black"></div>
                   </div>
                 </div>
-
                 <input
                   type="number"
                   step="0.001"
@@ -242,8 +262,8 @@ export default function InventoryAlert() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </main>
   );
 }

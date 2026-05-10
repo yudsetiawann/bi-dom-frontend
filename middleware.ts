@@ -2,24 +2,47 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Cek apakah pengunjung punya tiket masuk (token)
   const token = request.cookies.get('auth_token')?.value;
-  const isLoginPage = request.nextUrl.pathname === '/login';
+  const role = request.cookies.get('user_role')?.value;
+  const { pathname } = request.nextUrl;
 
-  // Jika tidak punya token dan mencoba masuk ke halaman selain login, tendang ke /login
-  if (!token && !isLoginPage) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // 1. Jika token ATAU role hilang, berarti sesi korup. Tendang ke /login dan bersihkan sisa cookie!
+  if ((!token || !role) && !pathname.startsWith('/login')) {
+    const response = NextResponse.redirect(new URL('/login', request.url));
+    response.cookies.delete('auth_token');
+    response.cookies.delete('user_role');
+    response.cookies.delete('user_name');
+    return response;
   }
 
-  // Jika sudah punya token tapi mencoba buka /login, tendang ke Dashboard (/)
-  if (token && isLoginPage) {
-    return NextResponse.redirect(new URL('/', request.url));
+  // 2. Jika Kasir iseng buka URL terlarang, tendang ke /invoices
+  if (role === 'kasir') {
+    const restrictedPaths = ['/products', '/inventory'];
+    const isRestricted =
+      pathname === '/' ||
+      restrictedPaths.some((path) => pathname.startsWith(path));
+
+    if (isRestricted) {
+      return NextResponse.redirect(new URL('/invoices', request.url));
+    }
+  }
+
+  // 3. Jika SUDAH login lengkap dan mencoba buka /login, kembalikan ke dashboard/invoices
+  if (token && role && pathname.startsWith('/login')) {
+    const redirectUrl = role === 'kasir' ? '/invoices' : '/';
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   return NextResponse.next();
 }
 
-// Daftarkan halaman mana saja yang dijaga oleh satpam ini
 export const config = {
-  matcher: ['/', '/inventory', '/import', '/login'],
+  matcher: [
+    '/',
+    '/products/:path*',
+    '/inventory/:path*',
+    '/invoices/:path*',
+    '/import/:path*',
+    '/login',
+  ],
 };
