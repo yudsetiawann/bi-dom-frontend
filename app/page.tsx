@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
+import { Suspense } from 'react';
 import { useDashboard } from '@/hooks/useDashboard';
 import { formatRupiah } from '@/lib/utils';
 import {
@@ -23,14 +24,16 @@ import { AlertTriangle } from 'lucide-react';
 export default function Dashboard() {
   // Panggil Custom Hook!
   const { state, setters, data, loaders, handlers } = useDashboard();
+  const latestTransactions = data.tableData?.latestTrx ?? [];
+  const topProducts = data.tableData?.topProducts ?? [];
 
   // --- FRAMER MOTION VARIANTS ---
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
@@ -177,7 +180,9 @@ export default function Dashboard() {
               </svg>
             </div>
           </div>
-          <ExportButton />
+          <Suspense fallback={null}>
+            <ExportButton />
+          </Suspense>
         </div>
       </header>
 
@@ -422,8 +427,8 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/10">
-                  {data.tableData?.latestTrx?.length > 0 ? (
-                    data.tableData.latestTrx.map((trx: any) => (
+                  {latestTransactions.length > 0 ? (
+                    latestTransactions.map((trx: any) => (
                       <tr
                         key={trx.id}
                         onClick={() => {
@@ -468,8 +473,8 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/10">
-                  {data.tableData?.topProducts?.length > 0 ? (
-                    data.tableData.topProducts.map(
+                  {topProducts.length > 0 ? (
+                    topProducts.map(
                       (item: TopProduct, i: number) => (
                         <tr key={i} className="hover:bg-red-50 group">
                           <td className="p-3 truncate max-w-[150px]">
