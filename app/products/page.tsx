@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useProducts } from '@/hooks/useProducts';
 import { Plus, Trash2, Save, Coffee, Tag, Edit2, X } from 'lucide-react';
 
@@ -8,12 +8,12 @@ export default function MasterProduct() {
   const { state, setters, data, mutations, handlers } = useProducts();
 
   // --- FRAMER MOTION VARIANTS ---
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,

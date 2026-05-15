@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useInvoices } from '@/hooks/useInvoices';
 import { formatRupiah, formatDate } from '@/lib/utils';
 import TransactionModal from '@/components/ui/TransactionModal';
@@ -19,12 +19,12 @@ export default function InvoiceReceiptPage() {
   const { state, setters, data, loaders, handlers } = useInvoices();
 
   // --- FRAMER MOTION VARIANTS ---
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
