@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
+import { setAuthCookies } from '@/lib/authCookies';
 import { toast } from 'sonner';
 import { Terminal, User, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -30,12 +31,7 @@ export default function LoginPage() {
       return response.data;
     },
     onSuccess: (data) => {
-      // 1. Simpan Token
-      Cookies.set('auth_token', data.data.token, { expires: 1 });
-
-      // 2. Simpan Role & Nama (Asumsi struktur response: data.data.user.role)
-      Cookies.set('user_role', data.data.user.role, { expires: 1 });
-      Cookies.set('user_name', data.data.user.name, { expires: 1 });
+      setAuthCookies(data.data.token, data.data.user.role, data.data.user.name);
 
       toast.success('ACCESS_GRANTED', {
         description: 'Autentikasi berhasil. Selamat datang di sistem.',

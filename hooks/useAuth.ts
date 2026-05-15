@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
+import { clearAuthCookies } from '@/lib/authCookies';
 
 export function useAuth() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -26,16 +27,7 @@ export function useAuth() {
       console.log('Backend timeout/error, forcing local clear...');
     }
 
-    const allCookies = Cookies.get();
-    for (const cookieName in allCookies) {
-      Cookies.remove(cookieName);
-      Cookies.remove(cookieName, { path: '/' });
-      Cookies.remove(cookieName, {
-        path: '/',
-        domain: window.location.hostname,
-      });
-    }
-
+    clearAuthCookies();
     localStorage.clear();
     window.location.replace('/login');
   };
