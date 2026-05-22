@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function ImportData() {
-  const { state, setters, mutations, handlers } = useImport();
+  const { state, mutations, handlers } = useImport();
 
   return (
     <main className="p-4 md:p-8 max-w-5xl mx-auto pb-20 font-montserrat flex flex-col min-h-screen">
@@ -28,18 +28,25 @@ export default function ImportData() {
             Data_Injection
           </h1>
           <p className="text-[10px] md:text-xs font-bold tracking-widest text-black/50 uppercase">
-            // Upload Griyo POS Raw Data
+            {'// Upload Griyo POS Raw Data'}
           </p>
         </div>
         <form
           onSubmit={handlers.handleUpload}
           className="relative z-10 max-w-md mx-auto space-y-6"
         >
-          <div className="border-2 border-dashed border-black bg-gray-50 p-8 text-center hover:bg-gray-100 transition-colors relative cursor-pointer group">
+          <div
+            onDragOver={handlers.handleDragOver}
+            onDragLeave={handlers.handleDragLeave}
+            onDrop={handlers.handleDrop}
+            className={`border-2 border-dashed border-black p-8 text-center transition-colors relative cursor-pointer group ${
+              state.isDragging ? 'bg-red-50' : 'bg-gray-50 hover:bg-gray-100'
+            }`}
+          >
             <input
               type="file"
               accept=".csv"
-              onChange={(e) => setters.setFile(e.target.files?.[0] || null)}
+              onChange={handlers.handleFileChange}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             {state.file ? (
@@ -81,7 +88,7 @@ export default function ImportData() {
         <div className="flex items-center gap-3 mb-6 border-b border-white/20 pb-4">
           <Info className="text-red-600" size={24} />
           <h2 className="text-lg md:text-xl font-black italic tracking-widest uppercase">
-            // System_Data_Protocol
+            {'// System_Data_Protocol'}
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 text-sm">
