@@ -1,37 +1,271 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BI DOM Frontend
 
-## Getting Started
+Frontend web dashboard untuk sistem **Business Intelligence DOM Social Hub**. Aplikasi ini menampilkan dashboard analytics, invoice ledger, import CSV transaksi, inventory forecasting, product & recipe management, serta export report PDF dari backend Laravel.
 
-First, run the development server:
+Project ini terhubung dengan repository backend: [`bi-dom-backend`](https://github.com/fredyyfajarr/bi-dom-backend).
+
+---
+
+## Ringkasan Fitur
+
+- **Login & Role-Based Access**
+  - Login menggunakan token dari Laravel Sanctum.
+  - Token dan role disimpan di cookie.
+  - Middleware frontend mengarahkan akses berdasarkan role:
+    - `manager` masuk ke dashboard utama.
+    - `kasir` diarahkan ke halaman invoice.
+
+- **Central Analytics Dashboard**
+  - KPI revenue, net profit, profit margin, dan total transaksi.
+  - Grafik revenue per kategori.
+  - Filter tahun dan drill-down bulan.
+  - Toggle / exclude kategori pada visualisasi tertentu.
+  - Top product, latest transaction, category donut chart, dan inventory alert.
+  - Advanced analytics: daily revenue, peak hour heatmap, stacked category trend, dan market basket suggestion.
+
+- **Invoice Receipts**
+  - Tabel transaksi / struk.
+  - Search receipt number.
+  - Filter tanggal: all time, hari ini, bulan ini, tahun ini.
+  - Sorting kolom dan pagination.
+  - Modal detail transaksi.
+
+- **Import CSV**
+  - Upload file CSV transaksi dari POS.
+  - Panduan format CSV langsung di halaman import.
+  - Validasi file `.csv` sebelum upload.
+
+- **Inventory Control**
+  - Monitoring stok bahan baku.
+  - Alert status stok kritis.
+  - Estimasi pemakaian berdasarkan forecasting backend.
+  - Tambah stok masuk.
+  - Tambah master item inventory.
+
+- **Master Catalog**
+  - CRUD produk.
+  - Input harga, kategori, dan resep / material produk.
+  - Edit product & recipe management.
+
+- **PDF Report Export**
+  - Export laporan PDF dari endpoint backend.
+
+---
+
+## Tech Stack
+
+- Next.js `16.2.4`
+- React `19.2.4`
+- TypeScript
+- Tailwind CSS 4
+- Axios
+- TanStack React Query
+- Chart.js + React Chart.js 2
+- Framer Motion
+- Lucide React
+- Sonner Toast
+- js-cookie
+
+---
+
+## Prasyarat
+
+Pastikan sudah terinstall:
+
+- Node.js
+- npm
+- Backend `bi-dom-backend` sudah berjalan
+
+Backend default yang digunakan:
+
+```txt
+http://127.0.0.1:8000/api/v1
+```
+
+---
+
+## Instalasi Lokal
+
+Clone repository:
+
+```bash
+git clone https://github.com/fredyyfajarr/bi-dom-frontend.git
+cd bi-dom-frontend
+```
+
+Install dependency:
+
+```bash
+npm install
+```
+
+Buat file environment lokal:
+
+```bash
+cp .env.example .env.local
+```
+
+Jika `.env.example` belum tersedia, buat manual file `.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
+```
+
+Jalankan development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka aplikasi di browser:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Script NPM
 
-To learn more about Next.js, take a look at the following resources:
+| Command | Fungsi |
+|---|---|
+| `npm run dev` | Menjalankan development server |
+| `npm run build` | Build aplikasi production |
+| `npm run start` | Menjalankan hasil build production |
+| `npm run lint` | Menjalankan ESLint |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment Variable
 
-## Deploy on Vercel
+| Variable | Contoh | Keterangan |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `http://127.0.0.1:8000/api/v1` | Base URL API backend Laravel |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Jika variable tidak diisi, aplikasi akan menggunakan fallback:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# bi-dom-frontend
+```txt
+http://127.0.0.1:8000/api/v1
+```
+
+---
+
+## Akun Demo
+
+Akun demo berasal dari seeder backend.
+
+| Role | Email | Password | Akses |
+|---|---|---|---|
+| Manager | `manager@dom.com` | `password123` | Dashboard, product, inventory, import, invoice, report |
+| Kasir | `kasir@dom.com` | `password123` | Invoice dan import data transaksi |
+
+> Untuk production, ubah credential demo di backend.
+
+---
+
+## Struktur Halaman Utama
+
+| Route | Role | Keterangan |
+|---|---|---|
+| `/login` | Public | Halaman login |
+| `/` | Manager | Central analytics dashboard |
+| `/invoices` | Manager, Kasir | Daftar invoice / transaksi |
+| `/import` | Manager, Kasir | Upload CSV transaksi |
+| `/products` | Manager | Master catalog produk dan resep |
+| `/inventory` | Manager | Inventory control dan forecasting |
+
+---
+
+## Integrasi Backend
+
+Aplikasi menggunakan Axios instance di `lib/axios.ts`. Token dari cookie `auth_token` otomatis dikirim sebagai header:
+
+```txt
+Authorization: Bearer <token>
+```
+
+Pastikan backend sudah berjalan sebelum membuka frontend:
+
+```bash
+cd ../bi-dom-backend
+php artisan serve
+```
+
+Lalu jalankan frontend:
+
+```bash
+cd ../bi-dom-frontend
+npm run dev
+```
+
+---
+
+## Format CSV Import
+
+Halaman import membutuhkan file `.csv` dengan header berikut:
+
+```csv
+receipt_no,trx_date,product_name,qty,subtotal
+```
+
+Contoh:
+
+```csv
+receipt_no,trx_date,product_name,qty,subtotal
+INV-001,2026-04-28 10:30,Aren Latte,2,40000
+INV-001,2026-04-28 10:30,Mix Platter,1,35000
+INV-002,2026-04-28 11:15,Lychee Tea,1,20000
+```
+
+Aturan penting:
+
+- Data harus itemized per menu.
+- Jika satu struk berisi tiga menu, tulis menjadi tiga baris dengan `receipt_no` yang sama.
+- `subtotal` adalah harga item dikali qty.
+- Jangan gunakan titik atau koma sebagai pemisah ribuan pada nominal.
+
+---
+
+## Build Production
+
+Build aplikasi:
+
+```bash
+npm run build
+```
+
+Jalankan hasil build:
+
+```bash
+npm run start
+```
+
+---
+
+## Troubleshooting
+
+### Halaman balik lagi ke login
+
+Kemungkinan cookie token atau role tidak tersimpan. Coba login ulang dan pastikan backend merespons token dengan benar.
+
+### 401 Unauthorized
+
+Token tidak terkirim atau sudah tidak valid. Hapus cookie browser, login ulang, dan pastikan backend berjalan.
+
+### 403 Forbidden
+
+Role user tidak punya akses. Halaman dashboard, product, inventory, dan report hanya untuk manager.
+
+### Data dashboard kosong
+
+Pastikan backend sudah memiliki data transaksi. Jalankan seeder backend atau upload CSV melalui halaman import.
+
+### Export PDF gagal
+
+Pastikan endpoint backend `/reports/export-pdf` bisa diakses oleh user manager dan dependency DomPDF backend sudah terinstall.
+
+---
+
+## Related Repository
+
+- Backend: [`bi-dom-backend`](https://github.com/fredyyfajarr/bi-dom-backend)
