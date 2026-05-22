@@ -99,19 +99,19 @@ Install dependency:
 npm install
 ```
 
-Buat file environment lokal:
+Jika backend berjalan di URL default, `.env.local` tidak wajib dibuat karena aplikasi sudah punya fallback ke backend lokal.
 
-```bash
-cp .env.example .env.local
-```
-
-Jika `.env.example` belum tersedia, buat manual file `.env.local`:
+Jika URL backend berbeda, buat `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
 ```
 
-Jalankan development server:
+---
+
+## Menjalankan Local Development
+
+Jalankan frontend:
 
 ```bash
 npm run dev
@@ -120,8 +120,28 @@ npm run dev
 Buka aplikasi di browser:
 
 ```txt
-http://localhost:3000
+http://localhost:3000/login
 ```
+
+Jika port 3000 sedang dipakai project lain:
+
+```bash
+npm run dev -- -p 3001
+```
+
+Pastikan backend Laravel, queue worker, scheduler, dan MySQL sudah berjalan jika ingin mengetes flow lengkap.
+
+---
+
+## Flow Aplikasi
+
+1. Browser membuka Next.js di `localhost:3000`.
+2. User login lewat halaman frontend.
+3. Frontend mengirim request ke Laravel API lewat Axios.
+4. Token auth disimpan di cookie `auth_token`.
+5. Request berikutnya otomatis membawa header `Authorization: Bearer <token>`.
+6. Laravel API mengembalikan data JSON dari MySQL.
+7. Jika backend membuat job queue, job diproses oleh `php artisan queue:work` di proses terpisah.
 
 ---
 
@@ -188,7 +208,9 @@ Pastikan backend sudah berjalan sebelum membuka frontend:
 
 ```bash
 cd ../bi-dom-backend
-php artisan serve
+php artisan serve --host=127.0.0.1 --port=8000
+php artisan queue:work
+php artisan schedule:work
 ```
 
 Lalu jalankan frontend:
@@ -239,6 +261,18 @@ Jalankan hasil build:
 ```bash
 npm run start
 ```
+
+---
+
+## Deploy
+
+Frontend bisa di-deploy ke Vercel. Set environment `NEXT_PUBLIC_API_URL` ke URL backend production, misalnya:
+
+```env
+NEXT_PUBLIC_API_URL=https://api-domain-kamu.com/api/v1
+```
+
+Laravel backend tidak ikut jalan di Vercel sebagai `php artisan serve`; backend perlu host API production terpisah.
 
 ---
 
