@@ -3,11 +3,31 @@
 import { useState, useEffect } from 'react'; // <-- Tambahkan useEffect di sini
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
 import { setAuthCookies } from '@/lib/authCookies';
 import { toast } from 'sonner';
 import { Terminal, User, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
+
+type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+type LoginResponse = {
+  data: {
+    token: string;
+    user: {
+      role: string;
+      name: string;
+    };
+  };
+};
+
+type ApiErrorResponse = {
+  message?: string;
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,8 +45,12 @@ export default function LoginPage() {
     localStorage.clear();
   }, []);
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: any) => {
+  const loginMutation = useMutation<
+    LoginResponse,
+    AxiosError<ApiErrorResponse>,
+    LoginCredentials
+  >({
+    mutationFn: async (credentials) => {
       const response = await api.post('/login', credentials);
       return response.data;
     },
@@ -44,7 +68,7 @@ export default function LoginPage() {
         router.push('/invoices'); // Kasir langsung lempar ke Invoices
       }
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error('ACCESS_DENIED', {
         description:
           error.response?.data?.message || 'Email atau Password tidak valid.',
@@ -120,8 +144,8 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-6">
             {/* Input Email */}
             <div className="space-y-2">
-              <label className="block text-[10px] font-black tracking-widest uppercase text-black">
-                User_Identification
+              <label className="block text-[10px] font-black tracking-widest text-black">
+                Email address
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-black/40 group-focus-within:text-red-600 transition-colors">
@@ -130,8 +154,8 @@ export default function LoginPage() {
                 <input
                   type="email"
                   required
-                  placeholder="ENTER_EMAIL_ADDRESS"
-                  className="w-full border-2 border-black p-4 pl-12 font-bold text-xs bg-gray-50 focus:outline-none focus:bg-white focus:border-red-600 transition-all uppercase tracking-wider placeholder:text-gray-300"
+                  placeholder="manager@dom.com"
+                  className="w-full border-2 border-black p-4 pl-12 font-bold text-xs bg-gray-50 focus:outline-none focus:bg-white focus:border-red-600 transition-all tracking-wider placeholder:text-gray-300 normal-case"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -140,8 +164,8 @@ export default function LoginPage() {
 
             {/* Input Password */}
             <div className="space-y-2">
-              <label className="block text-[10px] font-black tracking-widest uppercase text-black">
-                Security_Key
+              <label className="block text-[10px] font-black tracking-widest text-black">
+                Password
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-black/40 group-focus-within:text-red-600 transition-colors">
