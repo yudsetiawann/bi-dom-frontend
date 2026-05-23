@@ -1,7 +1,7 @@
 // hooks/useImport.ts
 import type { ChangeEvent, DragEvent, FormEvent } from 'react';
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { uploadTransactionCsv } from '@/lib/api/importApi';
 import { toast } from 'sonner';
@@ -32,10 +32,22 @@ export function useImport() {
     setFile(selectedFile);
   };
 
+  const queryClient = useQueryClient();
+
   const importMutation = useMutation({
     mutationFn: uploadTransactionCsv,
     onSuccess: (response: any) => {
       setFile(null);
+      
+      // Invalidate semua query dashboard & invoice agar data langsung muncul
+      queryClient.invalidateQueries({ queryKey: ['kpi'] });
+      queryClient.invalidateQueries({ queryKey: ['chart'] });
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
+      queryClient.invalidateQueries({ queryKey: ['donut'] });
+      queryClient.invalidateQueries({ queryKey: ['advancedAnalytics'] });
+      queryClient.invalidateQueries({ queryKey: ['availableYears'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+
       const data = response?.data;
       if (data?.skipped_count > 0) {
         toast.success('DATA_INJECTED', {
