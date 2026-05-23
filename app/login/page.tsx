@@ -44,7 +44,7 @@ export default function LoginPage() {
     LoginCredentials
   >({
     mutationFn: async (credentials) => {
-      await initCsrf();
+      // await initCsrf(); // Bypassed CSRF
       const response = await api.post('/login', credentials);
       return response.data;
     },
