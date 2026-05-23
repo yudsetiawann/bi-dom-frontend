@@ -34,11 +34,18 @@ export function useImport() {
 
   const importMutation = useMutation({
     mutationFn: uploadTransactionCsv,
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       setFile(null);
-      toast.success('DATA_INJECTED', {
-        description: 'File CSV berhasil diproses server.',
-      });
+      const data = response?.data;
+      if (data?.skipped_count > 0) {
+        toast.success('DATA_INJECTED', {
+          description: `${data.transactions} transaksi diproses, ${data.skipped_count} di-skip (sudah ada).`,
+        });
+      } else {
+        toast.success('DATA_INJECTED', {
+          description: `${data?.transactions ?? 0} transaksi berhasil diproses.`,
+        });
+      }
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       toast.error('UPLOAD_FAILED', {

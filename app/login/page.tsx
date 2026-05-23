@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react'; // <-- Tambahkan useEffect di sini
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import api from '@/lib/axios';
-import Cookies from 'js-cookie';
-import { setAuthCookies } from '@/lib/authCookies';
+import api, { initCsrf } from '@/lib/axios';
+import { setAuthCookies, clearAuthCookies } from '@/lib/authCookies';
 import { toast } from 'sonner';
 import { Terminal, User, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -17,7 +16,6 @@ type LoginCredentials = {
 
 type LoginResponse = {
   data: {
-    token: string;
     user: {
       role: string;
       name: string;
@@ -36,12 +34,7 @@ export default function LoginPage() {
 
   // 👉 RANJAU PEMBERSIH: Hancurkan semua sesi hantu saat halaman ini dibuka
   useEffect(() => {
-    Cookies.remove('auth_token');
-    Cookies.remove('auth_token', { path: '/' });
-    Cookies.remove('user_role');
-    Cookies.remove('user_role', { path: '/' });
-    Cookies.remove('user_name');
-    Cookies.remove('user_name', { path: '/' });
+    clearAuthCookies();
     localStorage.clear();
   }, []);
 
@@ -51,11 +44,12 @@ export default function LoginPage() {
     LoginCredentials
   >({
     mutationFn: async (credentials) => {
+      await initCsrf();
       const response = await api.post('/login', credentials);
       return response.data;
     },
     onSuccess: (data) => {
-      setAuthCookies(data.data.token, data.data.user.role, data.data.user.name);
+      setAuthCookies(data.data.user.role, data.data.user.name);
 
       toast.success('ACCESS_GRANTED', {
         description: 'Autentikasi berhasil. Selamat datang di sistem.',
