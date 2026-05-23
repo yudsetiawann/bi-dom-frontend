@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'; // <-- Tambahkan useEffect di sini
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import api, { initCsrf } from '@/lib/axios';
+import api from '@/lib/axios';
 import { setAuthCookies, clearAuthCookies } from '@/lib/authCookies';
 import { toast } from 'sonner';
 import { Terminal, User, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -16,6 +16,7 @@ type LoginCredentials = {
 
 type LoginResponse = {
   data: {
+    token: string;
     user: {
       role: string;
       name: string;
@@ -44,12 +45,11 @@ export default function LoginPage() {
     LoginCredentials
   >({
     mutationFn: async (credentials) => {
-      // await initCsrf(); // Bypassed CSRF
       const response = await api.post('/login', credentials);
       return response.data;
     },
     onSuccess: (data) => {
-      setAuthCookies(data.data.user.role, data.data.user.name);
+      setAuthCookies(data.data.token, data.data.user.role, data.data.user.name);
 
       toast.success('ACCESS_GRANTED', {
         description: 'Autentikasi berhasil. Selamat datang di sistem.',

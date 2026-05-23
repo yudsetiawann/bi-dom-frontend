@@ -7,16 +7,14 @@ const authCookieOptions: Cookies.CookieAttributes = {
   secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
 };
 
-/**
- * Save non-sensitive user info for client-side UI/routing.
- * Auth session is handled by HttpOnly cookie from Sanctum (not accessible via JS).
- */
-export function setAuthCookies(role: string, name: string) {
+export function setAuthCookies(token: string, role: string, name: string) {
+  Cookies.set('auth_token', token, authCookieOptions);
   Cookies.set('user_role', role, authCookieOptions);
   Cookies.set('user_name', name, authCookieOptions);
 }
 
 export function clearAuthCookies() {
+  Cookies.remove('auth_token', { path: '/' });
   Cookies.remove('user_role', { path: '/' });
   Cookies.remove('user_name', { path: '/' });
 }
