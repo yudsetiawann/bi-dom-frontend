@@ -2,6 +2,7 @@
 
 import { motion, type Variants } from 'framer-motion';
 import { useInventory } from '@/hooks/useInventory';
+import type { InventoryAlertItem } from '@/types/inventory.types';
 import {
   AlertTriangle,
   CheckCircle,
@@ -47,7 +48,7 @@ export default function InventoryAlert() {
         <div className="flex items-center gap-2 mt-1">
           <span className="w-2 h-2 bg-red-600 animate-pulse"></span>
           <p className="text-[9px] md:text-[10px] text-red-600 font-bold tracking-[0.2em] md:tracking-[0.4em] uppercase underline decoration-2 underline-offset-4">
-            SMA Forecast Active // Est. {forecast_next_week_trx || 0} TRX Next
+            SMA Forecast Active {'//'} Est. {forecast_next_week_trx || 0} TRX Next
             Week
           </p>
         </div>
@@ -65,7 +66,7 @@ export default function InventoryAlert() {
           className="lg:col-span-2 bg-white border-2 border-black p-4 md:p-8 shadow-[6px_6px_0px_#000000]"
         >
           <h3 className="text-[10px] md:text-xs font-black italic tracking-[0.2em] md:tracking-[0.3em] uppercase mb-6 md:mb-8">
-            // Material_Live_Monitoring
+            {'// Material_Live_Monitoring'}
           </h3>
           <div className="w-full overflow-x-auto border border-black/10">
             <table className="w-full min-w-[600px] text-[10px] md:text-[11px] uppercase font-bold tracking-wider text-left">
@@ -78,7 +79,7 @@ export default function InventoryAlert() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/10 text-black/70">
-                {inventory_alerts?.map((item: any) => (
+                {inventory_alerts?.map((item: InventoryAlertItem) => (
                   <tr
                     key={item.id}
                     className="hover:bg-red-50 transition-colors cursor-pointer"
@@ -121,7 +122,7 @@ export default function InventoryAlert() {
             <div className="flex items-center gap-2 mb-6">
               <Package size={16} />
               <h3 className="text-[10px] font-black italic tracking-widest uppercase">
-                // Inbound_Stock
+                {'// Inbound_Stock'}
               </h3>
             </div>
             <div className="space-y-4">
@@ -131,7 +132,7 @@ export default function InventoryAlert() {
                 onChange={(e) => setters.setSelectedId(Number(e.target.value))}
               >
                 <option value="">SELECT_MATERIAL</option>
-                {inventory_alerts?.map((item: any) => (
+                {inventory_alerts?.map((item: InventoryAlertItem) => (
                   <option key={item.id} value={item.id}>
                     {item.item_name}
                   </option>
@@ -167,7 +168,7 @@ export default function InventoryAlert() {
             <div className="flex items-center gap-2 mb-6">
               <PlusSquare size={16} className="text-red-600" />
               <h3 className="text-[10px] font-black italic tracking-widest uppercase text-red-600">
-                // Add_Master_Item
+                {'// Add_Master_Item'}
               </h3>
             </div>
             <div className="space-y-4">

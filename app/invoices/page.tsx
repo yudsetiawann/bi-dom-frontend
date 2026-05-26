@@ -4,6 +4,7 @@ import { motion, type Variants } from 'framer-motion';
 import { useInvoices } from '@/hooks/useInvoices';
 import { formatRupiah, formatDate } from '@/lib/utils';
 import TransactionModal from '@/components/ui/TransactionModal';
+import type { InvoiceRow } from '@/types/invoice.types';
 import {
   Search,
   ChevronDown,
@@ -14,6 +15,26 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+
+function SortIcon({
+  column,
+  sortBy,
+  sortDir,
+}: {
+  column: string;
+  sortBy: string;
+  sortDir: 'asc' | 'desc';
+}) {
+  if (sortBy !== column) {
+    return <ChevronDown size={14} className="opacity-20 inline-block ml-1" />;
+  }
+
+  return sortDir === 'asc' ? (
+    <ChevronUp size={14} className="text-red-600 inline-block ml-1" />
+  ) : (
+    <ChevronDown size={14} className="text-red-600 inline-block ml-1" />
+  );
+}
 
 export default function InvoiceReceiptPage() {
   const { state, setters, data, loaders, handlers } = useInvoices();
@@ -31,16 +52,6 @@ export default function InvoiceReceiptPage() {
       opacity: 1,
       transition: { type: 'spring', stiffness: 260, damping: 20 },
     },
-  };
-
-  const SortIcon = ({ column }: { column: string }) => {
-    if (state.sortBy !== column)
-      return <ChevronDown size={14} className="opacity-20 inline-block ml-1" />;
-    return state.sortDir === 'asc' ? (
-      <ChevronUp size={14} className="text-red-600 inline-block ml-1" />
-    ) : (
-      <ChevronDown size={14} className="text-red-600 inline-block ml-1" />
-    );
   };
 
   return (
@@ -129,25 +140,45 @@ export default function InvoiceReceiptPage() {
                     className="p-4 text-left cursor-pointer hover:bg-gray-900 select-none"
                     onClick={() => handlers.handleSort('receipt_no')}
                   >
-                    RECEIPT_NO <SortIcon column="receipt_no" />
+                    RECEIPT_NO{' '}
+                    <SortIcon
+                      column="receipt_no"
+                      sortBy={state.sortBy}
+                      sortDir={state.sortDir}
+                    />
                   </th>
                   <th
                     className="p-4 text-left cursor-pointer hover:bg-gray-900 select-none hidden md:table-cell"
                     onClick={() => handlers.handleSort('created_at')}
                   >
-                    DATE_TIME <SortIcon column="created_at" />
+                    DATE_TIME{' '}
+                    <SortIcon
+                      column="created_at"
+                      sortBy={state.sortBy}
+                      sortDir={state.sortDir}
+                    />
                   </th>
                   <th
                     className="p-4 text-center cursor-pointer hover:bg-gray-900 select-none hidden sm:table-cell"
                     onClick={() => handlers.handleSort('payment_method')}
                   >
-                    PAYMENT <SortIcon column="payment_method" />
+                    PAYMENT{' '}
+                    <SortIcon
+                      column="payment_method"
+                      sortBy={state.sortBy}
+                      sortDir={state.sortDir}
+                    />
                   </th>
                   <th
                     className="p-4 text-right cursor-pointer hover:bg-gray-900 select-none"
                     onClick={() => handlers.handleSort('total_amount')}
                   >
-                    TOTAL_VALUE <SortIcon column="total_amount" />
+                    TOTAL_VALUE{' '}
+                    <SortIcon
+                      column="total_amount"
+                      sortBy={state.sortBy}
+                      sortDir={state.sortDir}
+                    />
                   </th>
                 </tr>
               </thead>
@@ -162,7 +193,7 @@ export default function InvoiceReceiptPage() {
                     </td>
                   </tr>
                 ) : data.invoiceData?.data?.length > 0 ? (
-                  data.invoiceData.data.map((trx: any) => (
+                  data.invoiceData.data.map((trx: InvoiceRow) => (
                     <tr
                       key={trx.id}
                       onClick={() => {

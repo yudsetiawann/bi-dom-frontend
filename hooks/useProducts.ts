@@ -2,9 +2,16 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import api from '@/lib/axios';
 import { toast } from 'sonner';
-import { RecipeIngredient, ProductPayload } from '@/types/product.types';
+import {
+  InventoryMaterial,
+  ProductItem,
+  ProductMaterial,
+  RecipeIngredient,
+  ProductPayload,
+} from '@/types/product.types';
 
 export function useProducts() {
   const queryClient = useQueryClient();
@@ -21,13 +28,14 @@ export function useProducts() {
   // --- QUERIES ---
   const { data: inventoryItems } = useQuery({
     queryKey: ['inventoryItems'],
-    queryFn: async () =>
+    queryFn: async (): Promise<InventoryMaterial[]> =>
       (await api.get('/inventory/alerts')).data.data.inventory_alerts,
   });
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['products'],
-    queryFn: async () => (await api.get('/products')).data.data,
+    queryFn: async (): Promise<ProductItem[]> =>
+      (await api.get('/products')).data.data,
   });
 
   // --- MUTATIONS ---
@@ -44,7 +52,7 @@ export function useProducts() {
       resetForm();
       toast.success(editingId ? 'PRODUCT_UPDATED' : 'PRODUCT_REGISTERED');
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ message?: string }>) => {
       toast.error('FAILED', {
         description: err.response?.data?.message || 'Check your inputs',
       });
@@ -60,16 +68,16 @@ export function useProducts() {
     setRecipe([{ inventory_id: '', usage_qty: '' }]);
   };
 
-  const handleEditClick = (prod: any) => {
+  const handleEditClick = (prod: ProductItem) => {
     setEditingId(prod.id);
     setName(prod.name);
-    setPrice(prod.price);
-    setCategoryId(prod.category_id);
+    setPrice(String(prod.price));
+    setCategoryId(String(prod.category_id));
 
     if (prod.materials && prod.materials.length > 0) {
-      const existingRecipe = prod.materials.map((m: any) => ({
+      const existingRecipe = prod.materials.map((m: ProductMaterial) => ({
         inventory_id: m.id.toString(),
-        usage_qty: m.pivot.usage_qty,
+        usage_qty: String(m.pivot.usage_qty),
       }));
       setRecipe(existingRecipe);
     } else {

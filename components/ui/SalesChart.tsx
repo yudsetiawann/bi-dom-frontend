@@ -12,6 +12,13 @@ import {
   Filler,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import type {
+  ActiveElement,
+  Chart as ChartInstance,
+  ChartEvent,
+  LegendItem,
+} from 'chart.js';
+import type { SalesDataset } from '@/types/dashboard.types';
 
 ChartJS.register(
   CategoryScale,
@@ -26,7 +33,7 @@ ChartJS.register(
 
 interface SalesChartProps {
   labels: string[];
-  datasets: any[];
+  datasets: SalesDataset[];
   onPointClick?: (index: number) => void;
   onLegendChange?: (hiddenCategoryIds: number[]) => void;
 }
@@ -52,7 +59,7 @@ export default function SalesChart({
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    onClick: (event: any, elements: any[]) => {
+    onClick: (_event: ChartEvent, elements: ActiveElement[]) => {
       if (elements.length > 0 && onPointClick) onPointClick(elements[0].index);
     },
     plugins: {
@@ -64,21 +71,29 @@ export default function SalesChart({
           usePointStyle: true,
           padding: 20,
         },
-        onClick: (e: any, legendItem: any, legend: any) => {
+        onClick: (
+          _event: ChartEvent,
+          legendItem: LegendItem,
+          legend: { chart: ChartInstance<'line'> },
+        ) => {
           const index = legendItem.datasetIndex;
+          if (typeof index !== 'number') return;
+
           const ci = legend.chart;
           const meta = ci.getDatasetMeta(index);
 
           // 1. Logika Toggle Animasi Default Chart.js
-          meta.hidden =
-            meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+          meta.hidden = !meta.hidden;
           ci.update();
 
           // 2. Kumpulkan Array ID yang sedang disembunyikan
           const hiddenIds: number[] = [];
-          ci.data.datasets.forEach((ds: any, i: number) => {
+          ci.data.datasets.forEach((ds, i: number) => {
             const isHidden = ci.getDatasetMeta(i).hidden;
-            if (isHidden) hiddenIds.push(ds.categoryId);
+            const categoryId = (ds as SalesDataset).categoryId;
+            if (isHidden && typeof categoryId === 'number') {
+              hiddenIds.push(categoryId);
+            }
           });
 
           // 3. Kirim ke Dashboard Page (Parent)

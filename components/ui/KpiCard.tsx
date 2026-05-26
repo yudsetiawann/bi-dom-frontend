@@ -1,6 +1,12 @@
 'use client';
 
-export default function KpiCard({ title, value, subtitle }: any) {
+interface KpiCardProps {
+  title: string;
+  value?: string | number | null;
+  subtitle?: string;
+}
+
+export default function KpiCard({ title, value, subtitle }: KpiCardProps) {
   // Pastikan value tidak kosong, jika kosong tampilkan 0
   const displayValue = value || '0';
 

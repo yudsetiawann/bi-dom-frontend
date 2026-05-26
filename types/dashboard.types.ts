@@ -34,3 +34,51 @@ export interface TopProduct {
   total_qty: number;
   total_revenue: number;
 }
+
+export interface LatestTransaction {
+  id: number;
+  receipt_no: string;
+  total_amount: number;
+}
+
+export interface DailyRevenuePoint {
+  day_name: string;
+  total: number | string;
+}
+
+export interface StackedCategoryTrendPoint {
+  category_name: string;
+  time_unit: number;
+  total_revenue: number | string;
+}
+
+export interface DonutChartPoint {
+  label: string;
+  value: number;
+}
+
+export interface SalesDataset {
+  categoryId: number;
+  label: string;
+  data: number[];
+  borderColor?: string;
+  backgroundColor?: string;
+  hidden?: boolean;
+}
+
+export interface TransactionDetailItem {
+  name: string;
+  qty: number;
+  price: number;
+  subtotal: number;
+}
+
+export interface TransactionDetailResponse {
+  transaction?: {
+    receipt_no?: string;
+    created_at?: string;
+    trx_date?: string;
+    total_amount?: number;
+  };
+  items?: TransactionDetailItem[];
+}

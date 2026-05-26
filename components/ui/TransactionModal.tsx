@@ -1,11 +1,12 @@
 'use client';
 import { X, Receipt, FileText } from 'lucide-react';
 import { formatRupiah, formatDate } from '@/lib/utils';
+import type { TransactionDetailItem, TransactionDetailResponse } from '@/types/dashboard.types';
 
 interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  data: any;
+  data: TransactionDetailResponse | null | undefined;
   isLoading: boolean;
 }
 
@@ -75,12 +76,12 @@ export default function TransactionModal({
               </div>
               <div className="mb-6">
                 <h3 className="text-[10px] font-black italic tracking-widest uppercase text-red-600 mb-3 flex items-center gap-2">
-                  <FileText size={12} /> // Itemized_Details
+                  <FileText size={12} /> {'// Itemized_Details'}
                 </h3>
                 <div className="max-h-[250px] overflow-y-auto border-2 border-black/10 bg-gray-50 p-2">
                   <table className="w-full text-xs font-bold">
                     <tbody>
-                      {data.items?.map((item: any, idx: number) => (
+                      {data.items?.map((item: TransactionDetailItem, idx: number) => (
                         <tr
                           key={idx}
                           className="border-b border-black/5 last:border-0"
@@ -105,7 +106,7 @@ export default function TransactionModal({
                   Net_Total
                 </span>
                 <span className="font-black text-xl">
-                  {formatRupiah(data.transaction?.total_amount)}
+                  {formatRupiah(data.transaction?.total_amount ?? 0)}
                 </span>
               </div>
             </>

@@ -10,10 +10,15 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { CHART_COLORS, DAYS_ORDER } from '@/lib/constants'; // <-- Import dari constant
+import type {
+  DailyRevenuePoint,
+  PeakHourData,
+  StackedCategoryTrendPoint,
+} from '@/types/dashboard.types';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-export function DailyBarChart({ data }: { data: any[] }) {
+export function DailyBarChart({ data }: { data: DailyRevenuePoint[] }) {
   const sortedData = DAYS_ORDER.map((day) => {
     const found = data?.find((d) => d.day_name === day);
     return found ? Number(found.total) : 0;
@@ -42,10 +47,9 @@ export function DailyBarChart({ data }: { data: any[] }) {
 
 export function StackedCategoryChart({
   data,
-  period,
   labels,
 }: {
-  data: any[];
+  data: StackedCategoryTrendPoint[];
   period: string;
   labels: string[];
 }) {
@@ -61,7 +65,7 @@ export function StackedCategoryChart({
       data: labels.map((_, idx) => {
         const timeUnit = idx + 1;
         const found = data?.find(
-          (d) => d.category_name === cat && d.time_unit === timeUnit,
+          (d) => d.category_name === cat && Number(d.time_unit) === timeUnit,
         );
         return found ? Number(found.total_revenue) : 0;
       }),
@@ -84,7 +88,7 @@ export function PeakHoursHeatmap({
   data,
   onCellClick,
 }: {
-  data: any[];
+  data: PeakHourData[];
   onCellClick?: (day: string, hour: number) => void;
 }) {
   const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];

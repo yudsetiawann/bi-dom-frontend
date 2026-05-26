@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
+import type { StockUpdateStatus } from '@/types/inventory.types';
+import type { InventoryMaterial } from '@/types/product.types';
 
 export default function UpdateStockPage() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<InventoryMaterial[]>([]);
   const [selectedItem, setSelectedItem] = useState('');
   const [newStock, setNewStock] = useState('');
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<any>(null);
+  const [status, setStatus] = useState<StockUpdateStatus | null>(null);
   const router = useRouter();
 
   // Load daftar bahan saat halaman dibuka
@@ -30,7 +32,7 @@ export default function UpdateStockPage() {
         msg: 'DATABASE_UPDATED // STOCK_SYNC_COMPLETE',
       });
       setTimeout(() => router.push('/inventory'), 2000);
-    } catch (error) {
+    } catch {
       setStatus({ type: 'error', msg: 'EXECUTION_FAILED // CHECK_INPUT_DATA' });
     } finally {
       setLoading(false);
@@ -61,7 +63,7 @@ export default function UpdateStockPage() {
               required
             >
               <option value="">SELECT_ITEM_FROM_BUFFER...</option>
-              {items.map((item: any) => (
+              {items.map((item: InventoryMaterial) => (
                 <option key={item.id} value={item.id}>
                   {item.item_name} ({item.unit})
                 </option>

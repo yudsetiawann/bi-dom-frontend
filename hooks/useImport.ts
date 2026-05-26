@@ -6,6 +6,13 @@ import { AxiosError } from 'axios';
 import { uploadTransactionCsv } from '@/lib/api/importApi';
 import { toast } from 'sonner';
 
+interface ImportCsvResponse {
+  data?: {
+    transactions?: number;
+    skipped_count?: number;
+  };
+}
+
 export function useImport() {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -36,9 +43,9 @@ export function useImport() {
 
   const importMutation = useMutation({
     mutationFn: uploadTransactionCsv,
-    onSuccess: (response: any) => {
+    onSuccess: (response: ImportCsvResponse) => {
       setFile(null);
-      
+
       // Invalidate semua query dashboard & invoice agar data langsung muncul
       queryClient.invalidateQueries({ queryKey: ['kpi'] });
       queryClient.invalidateQueries({ queryKey: ['chart'] });
@@ -49,13 +56,15 @@ export function useImport() {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
 
       const data = response?.data;
-      if (data?.skipped_count > 0) {
+      const skippedCount = data?.skipped_count ?? 0;
+      const transactionCount = data?.transactions ?? 0;
+      if (skippedCount > 0) {
         toast.success('DATA_INJECTED', {
-          description: `${data.transactions} transaksi diproses, ${data.skipped_count} di-skip (sudah ada).`,
+          description: `${transactionCount} transaksi diproses, ${skippedCount} di-skip (sudah ada).`,
         });
       } else {
         toast.success('DATA_INJECTED', {
-          description: `${data?.transactions ?? 0} transaksi berhasil diproses.`,
+          description: `${transactionCount} transaksi berhasil diproses.`,
         });
       }
     },

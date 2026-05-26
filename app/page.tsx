@@ -8,6 +8,7 @@ import {
   MarketBasketPair,
   TopProduct,
   InventoryAlert,
+  LatestTransaction,
 } from '@/types/dashboard.types';
 
 import SalesChart from '@/components/ui/SalesChart';
@@ -198,7 +199,7 @@ export default function Dashboard() {
           className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
         >
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
-            // GROSS_REVENUE (
+            {'// GROSS_REVENUE ('}
             {state.chartPeriod === 'year'
               ? state.selectedYear
               : data.chartData?.labels[0]?.split(' ')[1] || 'ALL'}
@@ -217,7 +218,7 @@ export default function Dashboard() {
           className="bg-red-600 border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between text-white"
         >
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-white/70 mb-2">
-            // NET_PROFIT (LABA BERSIH)
+            {'// NET_PROFIT (LABA BERSIH)'}
           </h3>
           <div className="text-3xl lg:text-3xl font-black break-words">
             {formatRupiah(data.kpiData?.net_profit)}
@@ -232,7 +233,7 @@ export default function Dashboard() {
           className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
         >
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
-            // PROFIT_MARGIN (%)
+            {'// PROFIT_MARGIN (%)'}
           </h3>
           <div className="flex items-end gap-3">
             <div className="text-4xl lg:text-5xl font-black text-black">
@@ -263,7 +264,7 @@ export default function Dashboard() {
         <div className="lg:col-span-3 p-4 md:p-8 bg-white border-2 border-black shadow-[6px_6px_0px_#000000]">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xs font-black italic tracking-[0.2em] uppercase">
-              // REVENUE_TREND
+              {'// REVENUE_TREND'}
             </h3>
             {state.chartPeriod === 'month' && (
               <button
@@ -308,7 +309,7 @@ export default function Dashboard() {
       >
         <div className="lg:col-span-1 bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col">
           <h3 className="text-xs font-black italic tracking-[0.2em] mb-4 uppercase">
-            // PEAK_HOURS (Heatmap)
+            {'// PEAK_HOURS (Heatmap)'}
           </h3>
           <div className="flex-grow flex items-center">
             {data.advData?.peak_hours ? (
@@ -328,7 +329,7 @@ export default function Dashboard() {
         </div>
         <div className="lg:col-span-1 bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
           <h3 className="text-xs font-black italic tracking-[0.2em] mb-4 uppercase">
-            // DAILY_REVENUE (Avg)
+            {'// DAILY_REVENUE (Avg)'}
           </h3>
           <div className="h-[250px]">
             {data.advData?.daily_revenue && (
@@ -338,7 +339,7 @@ export default function Dashboard() {
         </div>
         <div className="lg:col-span-1 bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
           <h3 className="text-xs font-black italic tracking-[0.2em] mb-4 uppercase">
-            // CATEGORY_STACK_TREND
+            {'// CATEGORY_STACK_TREND'}
           </h3>
           <div className="h-[250px]">
             {data.advData?.stacked_trend && data.chartData?.labels && (
@@ -359,7 +360,7 @@ export default function Dashboard() {
         transition={{ delay: 0.4, type: 'spring' }}
       >
         <h3 className="text-xs font-black italic tracking-[0.2em] mb-2 uppercase flex items-center gap-2">
-          // BUNDLING_SUGGESTIONS{' '}
+          {'// BUNDLING_SUGGESTIONS'}{' '}
           <span className="bg-red-600 text-white px-2 py-0.5 text-[8px] not-italic">
             AI DRIVEN
           </span>
@@ -416,7 +417,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
             <h3 className="text-xs font-black italic tracking-[0.2em] mb-6 uppercase">
-              // Drill_Down_Logs (Recent 10)
+              {'// Drill_Down_Logs (Recent 10)'}
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px] uppercase font-bold tracking-wider">
@@ -428,7 +429,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-black/10">
                   {latestTransactions.length > 0 ? (
-                    latestTransactions.map((trx: any) => (
+                    latestTransactions.map((trx: LatestTransaction) => (
                       <tr
                         key={trx.id}
                         onClick={() => {
@@ -461,7 +462,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000]">
             <h3 className="text-xs font-black italic tracking-[0.2em] mb-6 uppercase">
-              // Top_Selling_Items
+              {'// Top_Selling_Items'}
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px] uppercase font-bold tracking-wider">

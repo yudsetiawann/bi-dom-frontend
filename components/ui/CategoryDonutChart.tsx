@@ -9,6 +9,7 @@ import {
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { CHART_COLORS } from '@/lib/constants'; // <-- Gunakan constant global
+import type { TooltipItem } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -47,11 +48,11 @@ export default function CategoryDonutChart({ data }: DonutProps) {
       tooltip: {
         backgroundColor: '#000',
         callbacks: {
-          label: (context: any) => {
+          label: (context: TooltipItem<'doughnut'>) => {
             const val = context.raw;
             const percentage =
-              totalQty > 0 ? ((val / totalQty) * 100).toFixed(1) : '0';
-            return ` ${val.toLocaleString('id-ID')} PCS (${percentage}%)`;
+              totalQty > 0 ? ((Number(val) / totalQty) * 100).toFixed(1) : '0';
+            return ` ${Number(val).toLocaleString('id-ID')} PCS (${percentage}%)`;
           },
         },
       },
@@ -89,19 +90,21 @@ export default function CategoryDonutChart({ data }: DonutProps) {
 
       chart.data.datasets.forEach((dataset, i) => {
         const currentMeta = chart.getDatasetMeta(i);
-        currentMeta.data.forEach((element: any, index) => {
+        currentMeta.data.forEach((element, index) => {
           const value = dataset.data[index] as number;
           if (value > 0 && totalQty > 0) {
             const percentage = (value / totalQty) * 100;
             if (percentage > 5) {
-              const { x, y } = element.tooltipPosition();
+              const { x, y } = element.tooltipPosition(true);
               ctx.fillStyle = '#ffffff';
               ctx.font = `bold ${percentFontSize}px Montserrat, sans-serif`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               ctx.shadowColor = 'rgba(0,0,0,0.5)';
               ctx.shadowBlur = 3;
-              ctx.fillText(`${percentage.toFixed(0)}%`, x, y);
+              if (x !== null && y !== null) {
+                ctx.fillText(`${percentage.toFixed(0)}%`, x, y);
+              }
               ctx.shadowColor = 'transparent';
               ctx.shadowBlur = 0;
             }

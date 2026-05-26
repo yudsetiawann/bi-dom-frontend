@@ -1,7 +1,8 @@
 // hooks/useDashboard.ts
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import type { InventoryAlert } from '@/types/dashboard.types';
 
 export function useDashboard() {
   const currentYear = new Date().getFullYear();
@@ -23,7 +24,7 @@ export function useDashboard() {
   } | null>(null);
 
   const getQueryParams = (includeExclude = false) => {
-    let q = `?year=${selectedYear}&period=${chartPeriod}`;
+    let q = `?year=${effectiveSelectedYear}&period=${chartPeriod}`;
     if (selectedMonthIndex !== null) q += `&monthIndex=${selectedMonthIndex}`;
     if (includeExclude && hiddenCategories.length > 0)
       q += `&exclude=${hiddenCategories.join(',')}`;
@@ -37,10 +38,15 @@ export function useDashboard() {
       (await api.get('/dashboard/available-years')).data.data,
   });
 
+  const effectiveSelectedYear =
+    availableYears.length > 0 && !availableYears.includes(selectedYear)
+      ? availableYears[0]
+      : selectedYear;
+
   const { data: kpiData } = useQuery({
     queryKey: [
       'kpi',
-      selectedYear,
+      effectiveSelectedYear,
       chartPeriod,
       selectedMonthIndex,
       hiddenCategories,
@@ -50,7 +56,7 @@ export function useDashboard() {
   });
 
   const { data: chartData, isLoading: loadChart } = useQuery({
-    queryKey: ['chart', selectedYear, chartPeriod, selectedMonthIndex],
+    queryKey: ['chart', effectiveSelectedYear, chartPeriod, selectedMonthIndex],
     queryFn: async () =>
       (await api.get(`/dashboard/charts${getQueryParams(false)}`)).data.data,
   });
@@ -58,7 +64,7 @@ export function useDashboard() {
   const { data: tableData } = useQuery({
     queryKey: [
       'tables',
-      selectedYear,
+      effectiveSelectedYear,
       chartPeriod,
       selectedMonthIndex,
       hiddenCategories,
@@ -78,7 +84,7 @@ export function useDashboard() {
     // Gunakan fungsi SELECT untuk mem-filter data dari cache TANPA merusak struktur aslinya
     select: (data) => {
       const alerts = data?.inventory_alerts || [];
-      return alerts.filter((item: any) => item.status === 'Kritis');
+      return alerts.filter((item: InventoryAlert) => item.status === 'Kritis');
     },
   });
 
@@ -95,7 +101,7 @@ export function useDashboard() {
   const { data: advData } = useQuery({
     queryKey: [
       'advancedAnalytics',
-      selectedYear,
+      effectiveSelectedYear,
       chartPeriod,
       selectedMonthIndex,
     ],
@@ -107,7 +113,7 @@ export function useDashboard() {
   const { data: peakDetailData, isLoading: loadPeakDetail } = useQuery({
     queryKey: [
       'peakDetail',
-      selectedYear,
+      effectiveSelectedYear,
       chartPeriod,
       selectedMonthIndex,
       peakDrillDown?.day,
@@ -127,7 +133,7 @@ export function useDashboard() {
   const { data: donutData } = useQuery({
     queryKey: [
       'donut',
-      selectedYear,
+      effectiveSelectedYear,
       chartPeriod,
       selectedMonthIndex,
       hiddenCategories,
@@ -136,13 +142,6 @@ export function useDashboard() {
       (await api.get(`/dashboard/donut-chart${getQueryParams(true)}`)).data
         .data,
   });
-
-  // --- EVENT HANDLERS ---
-  useEffect(() => {
-    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
-      setSelectedYear(availableYears[0]);
-    }
-  }, [availableYears, selectedYear]);
 
   const handleBackToYear = () => {
     setChartPeriod('year');
@@ -159,7 +158,7 @@ export function useDashboard() {
   // Export semua yang dibutuhkan oleh View (UI)
   return {
     state: {
-      selectedYear,
+      selectedYear: effectiveSelectedYear,
       chartPeriod,
       selectedMonthIndex,
       hiddenCategories,

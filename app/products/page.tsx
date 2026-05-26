@@ -3,6 +3,7 @@
 import { motion, type Variants } from 'framer-motion';
 import { useProducts } from '@/hooks/useProducts';
 import { Plus, Trash2, Save, Coffee, Tag, Edit2, X } from 'lucide-react';
+import type { InventoryMaterial, ProductItem, ProductMaterial } from '@/types/product.types';
 
 export default function MasterProduct() {
   const { state, setters, data, mutations, handlers } = useProducts();
@@ -56,11 +57,12 @@ export default function MasterProduct() {
             <h3 className="text-xs font-black italic tracking-widest uppercase flex items-center gap-2">
               {state.editingId ? (
                 <>
-                  <Edit2 size={16} className="text-red-600" /> // EDIT_MENU_MODE
+                  <Edit2 size={16} className="text-red-600" />{' '}
+                  {'// EDIT_MENU_MODE'}
                 </>
               ) : (
                 <>
-                  <Plus size={16} /> // ADD_NEW_MENU
+                  <Plus size={16} /> {'// ADD_NEW_MENU'}
                 </>
               )}
             </h3>
@@ -123,7 +125,7 @@ export default function MasterProduct() {
                     }
                   >
                     <option value="">SELECT_MATERIAL</option>
-                    {data.inventoryItems?.map((item: any) => (
+                    {data.inventoryItems?.map((item: InventoryMaterial) => (
                       <option key={item.id} value={item.id}>
                         {item.item_name} ({item.unit})
                       </option>
@@ -185,10 +187,10 @@ export default function MasterProduct() {
           className="bg-white border-2 border-black p-6 shadow-[8px_8px_0px_#dc2626]"
         >
           <h3 className="text-xs font-black italic tracking-widest uppercase mb-6 flex items-center gap-2">
-            <Coffee size={16} /> // Existing_Menu
+            <Coffee size={16} /> {'// Existing_Menu'}
           </h3>
           <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-            {data.products?.map((prod: any) => (
+            {data.products?.map((prod: ProductItem) => (
               <div
                 key={prod.id}
                 className={`border-b-2 border-black/5 pb-4 group relative cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded transition-colors ${state.editingId === prod.id ? 'bg-red-50' : ''}`}
@@ -215,7 +217,7 @@ export default function MasterProduct() {
                 </div>
                 {prod.materials && prod.materials.length > 0 ? (
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {prod.materials.map((m: any) => (
+                    {prod.materials.map((m: ProductMaterial) => (
                       <span
                         key={m.id}
                         className="text-[9px] bg-gray-100 border border-black/10 px-2 py-1 font-bold text-gray-700"
