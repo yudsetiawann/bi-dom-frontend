@@ -17,4 +17,5 @@ A Business Intelligence (BI) frontend dashboard built to display powerful analyt
 - **Utilities**: `js-cookie`, `lucide-react`, Tailwind CSS
 - **Notifications**: Sonner
 
-Copyright build dari nama saya Fredy Fajar Adi Putra
+Copyright &copy; 2026 Fredy Fajar Adi Putra. All Rights Reserved.
+
