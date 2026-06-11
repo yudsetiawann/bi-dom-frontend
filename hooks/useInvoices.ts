@@ -35,8 +35,7 @@ export function useInvoices() {
     queryKey: ['transactionDetail', selectedTrxId],
     queryFn: async () => {
       if (!selectedTrxId) return null;
-      return (await api.get(`/dashboard/transactions/${selectedTrxId}`)).data
-        .data;
+      return (await api.get(`/invoices/${selectedTrxId}`)).data.data;
     },
     enabled: !!selectedTrxId,
   });

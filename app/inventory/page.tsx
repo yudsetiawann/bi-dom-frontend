@@ -197,6 +197,21 @@ export default function InventoryAlert() {
                 />
                 <input
                   type="number"
+                  placeholder="CURRENT_STOCK"
+                  className="border border-black/20 p-2 text-xs font-bold outline-none focus:border-black"
+                  value={state.newItem.current_stock}
+                  onChange={(e) =>
+                    setters.setNewItem({
+                      ...state.newItem,
+                      current_stock:
+                        e.target.value === '' ? '' : parseFloat(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
                   placeholder="MIN_STOCK"
                   className="border border-black/20 p-2 text-xs font-bold outline-none focus:border-black"
                   value={state.newItem.min_stock}
@@ -253,6 +268,10 @@ export default function InventoryAlert() {
                 onClick={handlers.handleAddItem}
                 disabled={
                   !state.newItem.item_name ||
+                  !state.newItem.unit ||
+                  state.newItem.current_stock === '' ||
+                  state.newItem.min_stock === '' ||
+                  state.newItem.usage_per_trx === '' ||
                   mutations.addItemMutation.isPending
                 }
                 className="w-full bg-red-600 text-white p-3 font-black uppercase tracking-widest text-[10px] hover:bg-black transition-colors disabled:opacity-50"

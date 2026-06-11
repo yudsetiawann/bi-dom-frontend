@@ -131,8 +131,9 @@ export default function ImportData() {
               <FileText size={16} /> 2. Required CSV Structure
             </h3>
             <p className="text-gray-300 font-medium text-xs md:text-sm">
-              Pastikan baris pertama (*header*) menggunakan penamaan kolom
-              persis seperti tabel ini:
+              Pastikan baris pertama (*header*) minimal memakai kolom wajib
+              berikut. Kolom payment_method opsional; jika kosong sistem memakai
+              CASH.
             </p>
 
             <div className="w-full overflow-x-auto">
@@ -145,7 +146,8 @@ export default function ImportData() {
                       product_name
                     </th>
                     <th className="p-3 border-r border-white/20">qty</th>
-                    <th className="p-3">subtotal</th>
+                    <th className="p-3 border-r border-white/20">subtotal</th>
+                    <th className="p-3">payment_method</th>
                   </tr>
                 </thead>
                 <tbody className="text-gray-400 font-mono">
@@ -162,7 +164,10 @@ export default function ImportData() {
                     <td className="p-3 border-r border-white/20 text-white text-center">
                       2
                     </td>
-                    <td className="p-3 text-white">40000</td>
+                    <td className="p-3 border-r border-white/20 text-white">
+                      40000
+                    </td>
+                    <td className="p-3 text-white">QRIS</td>
                   </tr>
                   <tr className="border-t border-white/20 bg-white/5">
                     <td className="p-3 border-r border-white/20 text-white">
@@ -177,7 +182,10 @@ export default function ImportData() {
                     <td className="p-3 border-r border-white/20 text-white text-center">
                       1
                     </td>
-                    <td className="p-3 text-white">35000</td>
+                    <td className="p-3 border-r border-white/20 text-white">
+                      35000
+                    </td>
+                    <td className="p-3 text-white">QRIS</td>
                   </tr>
                   <tr className="border-t border-white/20">
                     <td className="p-3 border-r border-white/20 text-white">
@@ -192,7 +200,10 @@ export default function ImportData() {
                     <td className="p-3 border-r border-white/20 text-white text-center">
                       1
                     </td>
-                    <td className="p-3 text-white">20000</td>
+                    <td className="p-3 border-r border-white/20 text-white">
+                      20000
+                    </td>
+                    <td className="p-3 text-white">CASH</td>
                   </tr>
                 </tbody>
               </table>

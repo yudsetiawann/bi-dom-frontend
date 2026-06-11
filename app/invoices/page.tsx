@@ -214,7 +214,7 @@ export default function InvoiceReceiptPage() {
                       </td>
                       <td className="p-4 text-center hidden sm:table-cell">
                         <span className="bg-gray-100 px-2 py-1 border border-black/20 text-[10px]">
-                          {trx.payment_method || 'CASH'}
+                          {trx.payment_method || '-'}
                         </span>
                       </td>
                       <td className="p-4 text-right font-black group-hover:text-red-600">

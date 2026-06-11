@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import {
   InventoryMaterial,
   ProductItem,
+  ProductCategory,
   ProductMaterial,
   RecipeIngredient,
   ProductPayload,
@@ -20,6 +21,7 @@ export function useProducts() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [cogs, setCogs] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [recipe, setRecipe] = useState<RecipeIngredient[]>([
     { inventory_id: '', usage_qty: '' },
@@ -30,6 +32,12 @@ export function useProducts() {
     queryKey: ['inventoryItems'],
     queryFn: async (): Promise<InventoryMaterial[]> =>
       (await api.get('/inventory/alerts')).data.data.inventory_alerts,
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ['productCategories'],
+    queryFn: async (): Promise<ProductCategory[]> =>
+      (await api.get('/dashboard/categories-list')).data.data,
   });
 
   const { data: products, isLoading } = useQuery({
@@ -59,11 +67,26 @@ export function useProducts() {
     },
   });
 
+  const deleteProductMutation = useMutation({
+    mutationFn: async (id: number) => (await api.delete(`/products/${id}`)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      resetForm();
+      toast.success('PRODUCT_DELETED');
+    },
+    onError: (err: AxiosError<{ message?: string }>) => {
+      toast.error('DELETE_FAILED', {
+        description: err.response?.data?.message || 'Product could not be deleted',
+      });
+    },
+  });
+
   // --- FORM HANDLERS ---
   const resetForm = () => {
     setEditingId(null);
     setName('');
     setPrice('');
+    setCogs('');
     setCategoryId('');
     setRecipe([{ inventory_id: '', usage_qty: '' }]);
   };
@@ -72,6 +95,7 @@ export function useProducts() {
     setEditingId(prod.id);
     setName(prod.name);
     setPrice(String(prod.price));
+    setCogs(String(prod.cogs ?? 0));
     setCategoryId(String(prod.category_id));
 
     if (prod.materials && prod.materials.length > 0) {
@@ -108,20 +132,27 @@ export function useProducts() {
       name,
       category_id: categoryId,
       price,
+      cogs,
       materials: recipe,
     });
   };
 
+  const handleDelete = (id: number) => {
+    if (!window.confirm('Delete this product?')) return;
+    deleteProductMutation.mutate(id);
+  };
+
   // Kembalikan semua data dan fungsi ke UI
   return {
-    state: { editingId, name, price, categoryId, recipe },
-    setters: { setName, setPrice, setCategoryId },
-    data: { inventoryItems, products, isLoading },
-    mutations: { saveProductMutation },
+    state: { editingId, name, price, cogs, categoryId, recipe },
+    setters: { setName, setPrice, setCogs, setCategoryId },
+    data: { inventoryItems, categories, products, isLoading },
+    mutations: { saveProductMutation, deleteProductMutation },
     handlers: {
       resetForm,
       handleEditClick,
       handleSave,
+      handleDelete,
       addIngredientRow,
       removeIngredientRow,
       updateRecipeRow,

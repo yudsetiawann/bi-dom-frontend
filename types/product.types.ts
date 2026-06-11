@@ -9,6 +9,7 @@ export interface ProductPayload {
   name: string;
   category_id: string | number;
   price: string | number;
+  cogs: string | number;
   materials: RecipeIngredient[];
 }
 
@@ -16,6 +17,11 @@ export interface InventoryMaterial {
   id: number;
   item_name: string;
   unit: string;
+}
+
+export interface ProductCategory {
+  id: number;
+  name: string;
 }
 
 export interface ProductMaterial extends InventoryMaterial {
@@ -32,5 +38,6 @@ export interface ProductItem {
     name: string;
   } | null;
   price: string | number;
+  cogs: string | number;
   materials?: ProductMaterial[];
 }
