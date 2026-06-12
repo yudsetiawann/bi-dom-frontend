@@ -42,8 +42,11 @@ Inventory Alert is connected to the full transaction and product flow:
 1. Master Product stores menu item recipes.
 2. CSV Import sends sold products and quantities to the backend.
 3. Backend reduces current stock based on each product's recipe.
-4. Inventory Alert shows current stock, predicted usage, usage basis, and `Aman` / `Kritis` status.
-5. Search helps filter by material name, unit, or status.
+4. Inventory Alert uses the latest imported transaction date as the end of its 30-day SMA data window.
+5. Inventory Alert shows current stock, predicted usage, usage basis, and `Aman` / `Kritis` status.
+6. Search helps filter by material name, unit, or status.
+
+The visible `Data_Window` label shows which imported transaction period is being used for the forecast.
 
 `EST_USAGE` labels:
 

@@ -25,6 +25,8 @@ export interface InventoryAlertItem {
 
 export interface InventoryAlertsResponse {
   forecast_next_week_trx: number;
+  forecast_window_start?: string;
+  forecast_window_end?: string;
   inventory_alerts: InventoryAlertItem[];
 }
 

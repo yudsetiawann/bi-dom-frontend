@@ -21,7 +21,12 @@ export default function InventoryAlert() {
     NO_RECENT_USAGE: 'NO_USAGE_HISTORY',
     TRX_AVG_FALLBACK: 'TRX_AVG_FALLBACK',
   } as const;
-  const { forecast_next_week_trx, inventory_alerts } = data.inventoryData || {};
+  const {
+    forecast_next_week_trx,
+    forecast_window_start,
+    forecast_window_end,
+    inventory_alerts,
+  } = data.inventoryData || {};
   const filteredInventoryAlerts = useMemo(() => {
     const alerts = inventory_alerts || [];
     const keyword = searchQuery.trim().toLowerCase();
@@ -73,6 +78,11 @@ export default function InventoryAlert() {
             Week
           </p>
         </div>
+        {forecast_window_start && forecast_window_end && (
+          <p className="mt-2 text-[9px] font-black uppercase tracking-[0.2em] text-black/40">
+            Data_Window {forecast_window_start} {'->'} {forecast_window_end}
+          </p>
+        )}
       </header>
 
       <motion.div
