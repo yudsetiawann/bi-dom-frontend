@@ -105,7 +105,7 @@ export default function LoginPage() {
               Version
             </p>
             <p className="text-sm font-black text-white tracking-wider">
-              v2.0.4-Stable
+              v2.1.0-Stable
             </p>
           </div>
           <div>
