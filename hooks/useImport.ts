@@ -8,14 +8,24 @@ import { toast } from 'sonner';
 
 interface ImportCsvResponse {
   data?: {
+    details?: number;
     transactions?: number;
     skipped_count?: number;
+    rejected_count?: number;
+    rejected_receipts?: Array<{
+      receipt_no: string;
+      reason: string;
+      products: string[];
+    }>;
   };
 }
 
 export function useImport() {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [lastResult, setLastResult] = useState<ImportCsvResponse['data'] | null>(
+    null,
+  );
 
   const selectFile = (selectedFile?: File | null) => {
     if (!selectedFile) {
@@ -45,6 +55,7 @@ export function useImport() {
     mutationFn: uploadTransactionCsv,
     onSuccess: (response: ImportCsvResponse) => {
       setFile(null);
+      setLastResult(response?.data ?? null);
 
       // Invalidate semua query dashboard & invoice agar data langsung muncul
       queryClient.invalidateQueries({ queryKey: ['kpi'] });
@@ -54,13 +65,15 @@ export function useImport() {
       queryClient.invalidateQueries({ queryKey: ['advancedAnalytics'] });
       queryClient.invalidateQueries({ queryKey: ['availableYears'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['inventoryAlerts'] });
 
       const data = response?.data;
       const skippedCount = data?.skipped_count ?? 0;
+      const rejectedCount = data?.rejected_count ?? 0;
       const transactionCount = data?.transactions ?? 0;
-      if (skippedCount > 0) {
+      if (skippedCount > 0 || rejectedCount > 0) {
         toast.success('DATA_INJECTED', {
-          description: `${transactionCount} transaksi diproses, ${skippedCount} di-skip (sudah ada).`,
+          description: `${transactionCount} transaksi masuk, ${skippedCount} duplicate, ${rejectedCount} ditolak.`,
         });
       } else {
         toast.success('DATA_INJECTED', {
@@ -109,7 +122,7 @@ export function useImport() {
   };
 
   return {
-    state: { file, isDragging },
+    state: { file, isDragging, lastResult },
     setters: { setFile: selectFile },
     mutations: { importMutation },
     handlers: {

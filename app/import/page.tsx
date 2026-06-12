@@ -81,6 +81,59 @@ export default function ImportData() {
               : 'EXECUTE_UPLOAD'}
           </button>
         </form>
+        {state.lastResult && (
+          <div className="relative z-10 mt-8 max-w-2xl mx-auto border-2 border-black bg-gray-50 text-left shadow-[4px_4px_0px_#dc2626]">
+            <div className="grid grid-cols-3 divide-x-2 divide-black border-b-2 border-black">
+              <div className="p-4">
+                <p className="text-[9px] font-black uppercase tracking-widest text-black/40">
+                  Imported
+                </p>
+                <p className="text-xl font-black">
+                  {state.lastResult.transactions ?? 0}
+                </p>
+              </div>
+              <div className="p-4">
+                <p className="text-[9px] font-black uppercase tracking-widest text-black/40">
+                  Duplicate
+                </p>
+                <p className="text-xl font-black">
+                  {state.lastResult.skipped_count ?? 0}
+                </p>
+              </div>
+              <div className="p-4">
+                <p className="text-[9px] font-black uppercase tracking-widest text-black/40">
+                  Rejected
+                </p>
+                <p className="text-xl font-black text-red-600">
+                  {state.lastResult.rejected_count ?? 0}
+                </p>
+              </div>
+            </div>
+            {(state.lastResult.rejected_receipts?.length ?? 0) > 0 && (
+              <div className="p-4">
+                <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-red-600">
+                  Receipt ditolak karena product tidak cocok Master Product:
+                </p>
+                <div className="space-y-2">
+                  {state.lastResult.rejected_receipts?.map((receipt) => (
+                    <div
+                      key={receipt.receipt_no}
+                      className="border border-red-200 bg-red-50 p-3 text-[10px] font-bold uppercase"
+                    >
+                      <p className="font-black text-red-600">
+                        {receipt.receipt_no}
+                      </p>
+                      <p className="text-black/60">{receipt.reason}</p>
+                      <p className="text-black">
+                        {receipt.products.join(', ')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* SYSTEM DATA PROTOCOL (PANDUAN UNTUK PAK HARIS) */}

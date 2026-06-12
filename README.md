@@ -7,6 +7,7 @@ Next.js dashboard client for DOM Social Hub Business Intelligence. The app conne
 - **Login portal:** manager/kasir authentication against the backend API.
 - **BI dashboard:** revenue, COGS, net profit, category charts, top products, peak hours, market basket, and KPI views.
 - **CSV import page:** imports receipt-level transaction data into the backend.
+- **Import result review:** shows imported, duplicate, and rejected receipt counts after upload.
 - **Invoice page:** invoice list and detail modal with payment method visibility.
 - **Master Product page:** create, edit, delete, and search menu products.
 - **Recipe management:** assign required inventory materials and usage quantity to every menu product.
@@ -78,6 +79,8 @@ database/samples/import-transactions-dom-menu-inventory-alert-demo-fresh.csv
 ```
 
 The file uses receipt prefix `DOM-DEMO-PRESENT-*`, so it remains importable as long as it has not been imported before in the current database.
+
+If a CSV contains a product name that does not match Master Product, only that receipt is rejected. Other valid receipts still become invoices and update inventory forecast history.
 
 ## Tech Stack
 
