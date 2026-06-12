@@ -34,7 +34,7 @@ ChartJS.register(
 interface SalesChartProps {
   labels: string[];
   datasets: SalesDataset[];
-  onPointClick?: (index: number) => void;
+  onPointClick?: (index: number, datasetIndex: number) => void;
   onLegendChange?: (hiddenCategoryIds: number[]) => void;
 }
 
@@ -60,7 +60,9 @@ export default function SalesChart({
     responsive: true,
     maintainAspectRatio: false,
     onClick: (_event: ChartEvent, elements: ActiveElement[]) => {
-      if (elements.length > 0 && onPointClick) onPointClick(elements[0].index);
+      if (elements.length > 0 && onPointClick) {
+        onPointClick(elements[0].index, elements[0].datasetIndex);
+      }
     },
     plugins: {
       legend: {

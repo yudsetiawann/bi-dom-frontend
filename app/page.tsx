@@ -10,6 +10,7 @@ import {
   InventoryAlert,
   LatestTransaction,
 } from '@/types/dashboard.types';
+import type { ProductCategory } from '@/types/product.types';
 
 import SalesChart from '@/components/ui/SalesChart';
 import CategoryDonutChart from '@/components/ui/CategoryDonutChart';
@@ -20,11 +21,12 @@ import {
 } from '@/components/ui/AdvanceChart';
 import ExportButton from '@/components/ui/ExportButton';
 import TransactionModal from '@/components/ui/TransactionModal';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, RefreshCw, X } from 'lucide-react';
 
 export default function Dashboard() {
   // Panggil Custom Hook!
-  const { state, setters, data, loaders, handlers } = useDashboard();
+  const { state, setters, data, loaders, handlers, exportParams } =
+    useDashboard();
   const latestTransactions = data.tableData?.latestTrx ?? [];
   const topProducts = data.tableData?.topProducts ?? [];
 
@@ -56,6 +58,82 @@ export default function Dashboard() {
       />
 
       {/* MODAL PEAK HOUR DRILL-DOWN */}
+      {state.chartDrillThrough && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setters.setChartDrillThrough(null)}
+          ></div>
+          <div className="relative z-10 bg-white border-4 border-black w-full max-w-2xl shadow-[8px_8px_0px_#dc2626] p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-6 border-b-2 border-black pb-3">
+              <div>
+                <h2 className="font-black italic tracking-widest uppercase text-lg text-black">
+                  Chart_Drill_Through
+                </h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-red-600">
+                  {data.chartDrillData?.label || state.chartDrillThrough.label}
+                </p>
+              </div>
+              <button
+                onClick={() => setters.setChartDrillThrough(null)}
+                className="text-black hover:text-red-600"
+              >
+                <X size={22} />
+              </button>
+            </div>
+            {loaders.loadChartDrill ? (
+              <div className="py-10 text-center font-black text-xs animate-pulse">
+                LOADING_TRANSACTIONS...
+              </div>
+            ) : (
+              <div className="max-h-[420px] overflow-y-auto">
+                {(data.chartDrillData?.transactions || []).length === 0 ? (
+                  <div className="py-10 text-center font-black text-xs text-black/40">
+                    NO_TRANSACTION_IN_THIS_POINT
+                  </div>
+                ) : (
+                  <table className="w-full text-xs font-bold uppercase">
+                    <thead className="bg-gray-50 border-b-2 border-black text-[10px] tracking-widest">
+                      <tr>
+                        <th className="p-3 text-left">Receipt</th>
+                        <th className="p-3 text-left">Date</th>
+                        <th className="p-3 text-left">Payment</th>
+                        <th className="p-3 text-right">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-black/10">
+                      {data.chartDrillData?.transactions?.map(
+                        (trx: LatestTransaction) => (
+                          <tr
+                            key={trx.id}
+                            onClick={() => {
+                              setters.setSelectedTrxId(trx.id);
+                              setters.setIsModalOpen(true);
+                            }}
+                            className="cursor-pointer hover:bg-red-50"
+                          >
+                            <td className="p-3 font-black text-red-600">
+                              {trx.receipt_no}
+                            </td>
+                            <td className="p-3 text-black/60">
+                              {trx.trx_date || '-'}
+                            </td>
+                            <td className="p-3">{trx.payment_method || '-'}</td>
+                            <td className="p-3 text-right font-black">
+                              {formatRupiah(trx.total_amount)}
+                            </td>
+                          </tr>
+                        ),
+                      )}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {state.peakDrillDown && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
@@ -155,7 +233,57 @@ export default function Dashboard() {
             DOM Social Hub Integrated System
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex flex-wrap justify-end gap-2">
+            <input
+              type="date"
+              value={state.dateRange.start}
+              onChange={(event) =>
+                setters.setDateRange((current) => ({
+                  ...current,
+                  start: event.target.value,
+                }))
+              }
+              className="bg-white border-2 border-black px-3 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0px_#000000] focus:outline-none"
+            />
+            <input
+              type="date"
+              value={state.dateRange.end}
+              onChange={(event) =>
+                setters.setDateRange((current) => ({
+                  ...current,
+                  end: event.target.value,
+                }))
+              }
+              className="bg-white border-2 border-black px-3 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0px_#000000] focus:outline-none"
+            />
+            <select
+              value={state.selectedCategoryId}
+              onChange={(event) => setters.setSelectedCategoryId(event.target.value)}
+              className="bg-white border-2 border-black px-3 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0px_#000000] focus:outline-none"
+            >
+              <option value="">ALL_CATEGORY</option>
+              {data.categories.map((category: ProductCategory) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            {(state.dateRange.start ||
+              state.dateRange.end ||
+              state.selectedCategoryId) && (
+              <button
+                onClick={() => {
+                  setters.setDateRange({ start: '', end: '' });
+                  setters.setSelectedCategoryId('');
+                }}
+                className="bg-red-600 text-white border-2 border-black px-3 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0px_#000000]"
+              >
+                RESET_FILTER
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap justify-end gap-2">
           <div className="relative group">
             <select
               value={state.selectedYear}
@@ -182,8 +310,16 @@ export default function Dashboard() {
             </div>
           </div>
           <Suspense fallback={null}>
-            <ExportButton />
+            <ExportButton queryString={exportParams} />
           </Suspense>
+          </div>
+          <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-green-700">
+            <RefreshCw size={12} className="animate-spin" />
+            Auto refresh {Math.round(state.autoRefreshMs / 1000)}s
+            {state.lastRefreshedAt
+              ? ` // Last ${state.lastRefreshedAt.toLocaleTimeString('id-ID')}`
+              : ''}
+          </div>
         </div>
       </header>
 

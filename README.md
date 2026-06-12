@@ -6,6 +6,9 @@ Next.js dashboard client for DOM Social Hub Business Intelligence. The app conne
 
 - **Login portal:** manager/kasir authentication against the backend API.
 - **BI dashboard:** revenue, COGS, net profit, category charts, top products, peak hours, market basket, and KPI views.
+- **Dynamic slicers:** filter dashboard data by date range and product category.
+- **Line chart drill-through:** click revenue chart points to inspect transactions for that period, then open receipt details.
+- **Auto refresh indicator:** dashboard data refreshes automatically and shows the last refresh time.
 - **CSV import page:** imports receipt-level transaction data into the backend.
 - **Import result review:** shows imported, duplicate, and rejected receipt counts after upload.
 - **Invoice page:** invoice list and detail modal with payment method visibility.
@@ -13,6 +16,7 @@ Next.js dashboard client for DOM Social Hub Business Intelligence. The app conne
 - **Recipe management:** assign required inventory materials and usage quantity to every menu product.
 - **Inventory Alert page:** live material monitoring with forecasted usage, usage basis labels, critical status, inbound stock update, and material creation.
 - **Search support:** Master Product and Inventory Alert both include search inputs for faster demo and daily usage.
+- **Filtered dashboard report export:** PDF export follows the active dashboard year/month, date range, and category filters for presentation handoff.
 
 ## Backend Integration
 

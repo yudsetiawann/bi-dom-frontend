@@ -38,6 +38,8 @@ export interface TopProduct {
 export interface LatestTransaction {
   id: number;
   receipt_no: string;
+  trx_date?: string;
+  payment_method?: string;
   total_amount: number;
 }
 
