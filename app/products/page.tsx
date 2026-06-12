@@ -14,6 +14,11 @@ import type {
 export default function MasterProduct() {
   const { state, setters, data, mutations, handlers } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
+  const isRecipeComplete =
+    state.recipe.length > 0 &&
+    state.recipe.every(
+      (row) => row.inventory_id && Number(row.usage_qty) > 0,
+    );
 
   const filteredProducts = useMemo(() => {
     const products = data.products || [];
@@ -196,6 +201,11 @@ export default function MasterProduct() {
               >
                 <Plus size={12} /> Add_Ingredient
               </button>
+              {!isRecipeComplete && (
+                <p className="mt-3 text-[9px] font-black uppercase tracking-widest text-red-600">
+                  Recipe wajib diisi agar stock dan forecast bahan berjalan.
+                </p>
+              )}
             </div>
 
             <button
@@ -205,7 +215,8 @@ export default function MasterProduct() {
                 !state.name ||
                 !state.categoryId ||
                 !state.price ||
-                !state.cogs
+                !state.cogs ||
+                !isRecipeComplete
               }
               className={`w-full text-white p-4 font-black uppercase text-xs tracking-widest mt-6 shadow-[4px_4px_0px_#444] transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${state.editingId ? 'bg-red-600 hover:bg-red-700' : 'bg-black hover:bg-gray-800'}`}
             >

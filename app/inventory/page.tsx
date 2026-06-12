@@ -16,6 +16,11 @@ import {
 export default function InventoryAlert() {
   const { state, setters, data, mutations, handlers } = useInventory();
   const [searchQuery, setSearchQuery] = useState('');
+  const usageBasisLabel = {
+    RECIPE_SMA_30D: 'SMA_30D',
+    NO_RECENT_USAGE: 'NO_USAGE_HISTORY',
+    TRX_AVG_FALLBACK: 'TRX_AVG_FALLBACK',
+  } as const;
   const { forecast_next_week_trx, inventory_alerts } = data.inventoryData || {};
   const filteredInventoryAlerts = useMemo(() => {
     const alerts = inventory_alerts || [];
@@ -26,7 +31,7 @@ export default function InventoryAlert() {
     }
 
     return alerts.filter((item: InventoryAlertItem) =>
-      [item.item_name, item.unit, item.status]
+      [item.item_name, item.unit, item.status, item.usage_basis]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(keyword)),
     );
@@ -122,8 +127,22 @@ export default function InventoryAlert() {
                       <span className="text-[8px] opacity-40">{item.unit}</span>
                     </td>
                     <td className="p-3 text-center font-black text-black/40">
-                      {item.predicted_usage}{' '}
-                      <span className="text-[8px]">{item.unit}</span>
+                      <div>
+                        {item.predicted_usage}{' '}
+                        <span className="text-[8px]">{item.unit}</span>
+                      </div>
+                      <span
+                        className={`mt-1 inline-block text-[7px] font-black tracking-widest ${item.usage_basis === 'NO_RECENT_USAGE' ? 'text-gray-400' : 'text-red-600'}`}
+                        title={
+                          item.usage_basis === 'NO_RECENT_USAGE'
+                            ? 'Belum ada transaksi itemized 30 hari terakhir yang memakai bahan ini.'
+                            : item.usage_basis === 'RECIPE_SMA_30D'
+                              ? 'Forecast dari SMA pemakaian recipe bahan 30 hari terakhir.'
+                              : 'Fallback dari usage_per_trx karena belum ada histori recipe.'
+                        }
+                      >
+                        {usageBasisLabel[item.usage_basis]}
+                      </span>
                     </td>
                     <td className="p-3 text-right">
                       <span
@@ -275,15 +294,14 @@ export default function InventoryAlert() {
                       Simple Moving Average
                     </p>
                     <p className="font-medium leading-relaxed text-gray-300">
-                      Masukkan estimasi rata-rata pemakaian bahan per 1
-                      struk/transaksi. <br />
+                      Angka ini dipakai sebagai fallback saat belum ada histori
+                      transaksi itemized yang terhubung ke recipe produk. <br />
                       <br />
                       <span className="text-white font-bold">
                         AI Sistem
                       </span>{' '}
-                      akan menggunakan angka ini untuk memprediksi kapan stok
-                      bahan akan habis (Status Kritis) berdasarkan tren
-                      penjualan.
+                      akan lebih mengutamakan SMA pemakaian bahan aktual dari
+                      recipe produk selama 30 hari terakhir.
                     </p>
                     <div className="absolute top-full left-6 -mt-1 border-4 border-transparent border-t-black"></div>
                   </div>

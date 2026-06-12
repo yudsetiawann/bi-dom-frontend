@@ -19,6 +19,7 @@ export interface InventoryAlertItem {
   current_stock: number;
   unit: string;
   predicted_usage: number;
+  usage_basis: 'RECIPE_SMA_30D' | 'NO_RECENT_USAGE' | 'TRX_AVG_FALLBACK';
   status: string;
 }
 

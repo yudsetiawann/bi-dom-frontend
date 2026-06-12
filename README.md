@@ -9,8 +9,8 @@ Next.js dashboard client for DOM Social Hub Business Intelligence. The app conne
 - **CSV import page:** imports receipt-level transaction data into the backend.
 - **Invoice page:** invoice list and detail modal with payment method visibility.
 - **Master Product page:** create, edit, delete, and search menu products.
-- **Recipe management:** assign inventory materials and usage quantity to every menu product.
-- **Inventory Alert page:** live material monitoring with forecasted usage, critical status, inbound stock update, and material creation.
+- **Recipe management:** assign required inventory materials and usage quantity to every menu product.
+- **Inventory Alert page:** live material monitoring with forecasted usage, usage basis labels, critical status, inbound stock update, and material creation.
 - **Search support:** Master Product and Inventory Alert both include search inputs for faster demo and daily usage.
 
 ## Backend Integration
@@ -42,8 +42,16 @@ Inventory Alert is connected to the full transaction and product flow:
 1. Master Product stores menu item recipes.
 2. CSV Import sends sold products and quantities to the backend.
 3. Backend reduces current stock based on each product's recipe.
-4. Inventory Alert shows current stock, predicted usage, and `Aman` / `Kritis` status.
+4. Inventory Alert shows current stock, predicted usage, usage basis, and `Aman` / `Kritis` status.
 5. Search helps filter by material name, unit, or status.
+
+`EST_USAGE` labels:
+
+- `SMA_30D`: forecast is based on recipe material usage from the last 30 days.
+- `NO_USAGE_HISTORY`: this material has not been used by itemized transactions in the last 30 days, so estimated usage is `0`.
+- `TRX_AVG_FALLBACK`: fallback estimate from `usage_per_trx` because recipe-based transaction history is not available yet.
+
+Master Product cannot be saved until at least one valid recipe material is configured. This keeps sales import, stock deduction, and forecasting connected.
 
 Master Product search can filter by:
 
