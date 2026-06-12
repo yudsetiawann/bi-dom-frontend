@@ -24,7 +24,7 @@ export default function TransactionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 font-montserrat"
+      className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 font-montserrat"
       onClick={handleOverlayClick}
     >
       <div className="bg-white border-4 border-black w-full max-w-lg shadow-[12px_12px_0px_#dc2626] relative overflow-hidden animate-in fade-in zoom-in duration-200">
