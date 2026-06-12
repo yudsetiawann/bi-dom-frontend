@@ -14,6 +14,9 @@ import type {
 export default function MasterProduct() {
   const { state, setters, data, mutations, handlers } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedListCategoryId, setSelectedListCategoryId] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
   const isRecipeComplete =
     state.recipe.length > 0 &&
     state.recipe.every(
@@ -23,12 +26,18 @@ export default function MasterProduct() {
   const filteredProducts = useMemo(() => {
     const products = data.products || [];
     const keyword = searchQuery.trim().toLowerCase();
+    const categoryFilteredProducts = selectedListCategoryId
+      ? products.filter(
+          (product: ProductItem) =>
+            String(product.category_id) === selectedListCategoryId,
+        )
+      : products;
 
     if (!keyword) {
-      return products;
+      return categoryFilteredProducts;
     }
 
-    return products.filter((product: ProductItem) => {
+    return categoryFilteredProducts.filter((product: ProductItem) => {
       const materials = product.materials
         ?.map((material: ProductMaterial) => material.item_name)
         .join(' ');
@@ -42,7 +51,13 @@ export default function MasterProduct() {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(keyword));
     });
-  }, [data.products, searchQuery]);
+  }, [data.products, searchQuery, selectedListCategoryId]);
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+  const activePage = Math.min(currentPage, totalPages);
+  const paginatedProducts = useMemo(() => {
+    const start = (activePage - 1) * pageSize;
+    return filteredProducts.slice(start, start + pageSize);
+  }, [activePage, filteredProducts]);
 
   // --- FRAMER MOTION VARIANTS ---
   const containerVariants: Variants = {
@@ -248,11 +263,52 @@ export default function MasterProduct() {
               placeholder="SEARCH_MENU / CATEGORY / MATERIAL"
               className="w-full border-2 border-black pl-10 pr-3 py-3 font-black text-[10px] tracking-widest uppercase outline-none focus:bg-gray-50"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2">
+            <select
+              value={selectedListCategoryId}
+              onChange={(event) => {
+                setSelectedListCategoryId(event.target.value);
+                setCurrentPage(1);
+              }}
+              className="border-2 border-black px-3 py-3 font-black text-[10px] tracking-widest uppercase outline-none focus:bg-gray-50 bg-white"
+            >
+              <option value="">ALL_CATEGORY</option>
+              {data.categories?.map((category: ProductCategory) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            {(searchQuery || selectedListCategoryId) && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedListCategoryId('');
+                  setCurrentPage(1);
+                }}
+                className="border-2 border-black bg-black text-white px-4 py-3 font-black text-[10px] tracking-widest uppercase hover:bg-red-600 transition-colors"
+              >
+                RESET_VIEW
+              </button>
+            )}
+          </div>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-[9px] font-black uppercase tracking-widest text-black/50">
+            <span>
+              SHOWING {paginatedProducts.length} OF {filteredProducts.length}{' '}
+              MENU
+            </span>
+            <span>
+              PAGE {activePage} / {totalPages}
+            </span>
+          </div>
           <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-            {filteredProducts.map((prod: ProductItem) => (
+            {paginatedProducts.map((prod: ProductItem) => (
               <div
                 key={prod.id}
                 className={`border-b-2 border-black/5 pb-4 group relative cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded transition-colors ${state.editingId === prod.id ? 'bg-red-50' : ''}`}
@@ -316,6 +372,40 @@ export default function MasterProduct() {
               </div>
             )}
           </div>
+          {filteredProducts.length > pageSize && (
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <button
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={activePage === 1}
+                className="border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black hover:text-white transition-colors"
+              >
+                PREV
+              </button>
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const page = index + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`h-8 w-8 border-2 border-black text-[10px] font-black ${activePage === page ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
+                disabled={activePage === totalPages}
+                className="border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black hover:text-white transition-colors"
+              >
+                NEXT
+              </button>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </main>

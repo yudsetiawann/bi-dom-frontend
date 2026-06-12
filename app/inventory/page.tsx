@@ -16,6 +16,8 @@ import {
 export default function InventoryAlert() {
   const { state, setters, data, mutations, handlers } = useInventory();
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 12;
   const usageBasisLabel = {
     RECIPE_SMA_30D: 'SMA_30D',
     NO_RECENT_USAGE: 'NO_USAGE_HISTORY',
@@ -41,6 +43,15 @@ export default function InventoryAlert() {
         .some((value) => String(value).toLowerCase().includes(keyword)),
     );
   }, [inventory_alerts, searchQuery]);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredInventoryAlerts.length / pageSize),
+  );
+  const activePage = Math.min(currentPage, totalPages);
+  const paginatedInventoryAlerts = useMemo(() => {
+    const start = (activePage - 1) * pageSize;
+    return filteredInventoryAlerts.slice(start, start + pageSize);
+  }, [activePage, filteredInventoryAlerts]);
 
   // --- FRAMER MOTION VARIANTS ---
   const containerVariants: Variants = {
@@ -109,8 +120,20 @@ export default function InventoryAlert() {
               placeholder="SEARCH_MATERIAL / UNIT / STATUS"
               className="w-full border-2 border-black pl-10 pr-3 py-3 font-black text-[10px] tracking-widest uppercase outline-none focus:bg-gray-50"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setCurrentPage(1);
+              }}
             />
+          </div>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-[9px] font-black uppercase tracking-widest text-black/50">
+            <span>
+              SHOWING {paginatedInventoryAlerts.length} OF{' '}
+              {filteredInventoryAlerts.length} MATERIALS
+            </span>
+            <span>
+              PAGE {activePage} / {totalPages}
+            </span>
           </div>
           <div className="w-full overflow-x-auto border border-black/10">
             <table className="w-full min-w-[600px] text-[10px] md:text-[11px] uppercase font-bold tracking-wider text-left">
@@ -123,7 +146,7 @@ export default function InventoryAlert() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/10 text-black/70">
-                {filteredInventoryAlerts.map((item: InventoryAlertItem) => (
+                {paginatedInventoryAlerts.map((item: InventoryAlertItem) => (
                   <tr
                     key={item.id}
                     className="hover:bg-red-50 transition-colors cursor-pointer"
@@ -181,6 +204,40 @@ export default function InventoryAlert() {
               </tbody>
             </table>
           </div>
+          {filteredInventoryAlerts.length > pageSize && (
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <button
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={activePage === 1}
+                className="border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black hover:text-white transition-colors"
+              >
+                PREV
+              </button>
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const page = index + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`h-8 w-8 border-2 border-black text-[10px] font-black ${activePage === page ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
+                disabled={activePage === totalPages}
+                className="border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black hover:text-white transition-colors"
+              >
+                NEXT
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* SIDEBAR FORMS (KANAN) */}

@@ -12,9 +12,9 @@ Next.js dashboard client for DOM Social Hub Business Intelligence. The app conne
 - **CSV import page:** imports receipt-level transaction data into the backend.
 - **Import result review:** shows imported, duplicate, and rejected receipt counts after upload.
 - **Invoice page:** invoice list and detail modal with payment method visibility.
-- **Master Product page:** create, edit, delete, and search menu products.
+- **Master Product page:** create, edit, delete, search, paginate, and filter menu products by category.
 - **Recipe management:** assign required inventory materials and usage quantity to every menu product.
-- **Inventory Alert page:** live material monitoring with forecasted usage, usage basis labels, critical status, inbound stock update, and material creation.
+- **Inventory Alert page:** paginated live material monitoring with forecasted usage, usage basis labels, critical status, inbound stock update, and material creation.
 - **Search support:** Master Product and Inventory Alert both include search inputs for faster demo and daily usage.
 - **Filtered dashboard report export:** PDF export follows the active dashboard year/month, date range, and category filters for presentation handoff.
 
