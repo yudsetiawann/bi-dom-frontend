@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useInventory } from '@/hooks/useInventory';
 import type { InventoryAlertItem } from '@/types/inventory.types';
@@ -9,10 +10,27 @@ import {
   Package,
   PlusSquare,
   Info,
+  Search,
 } from 'lucide-react';
 
 export default function InventoryAlert() {
   const { state, setters, data, mutations, handlers } = useInventory();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { forecast_next_week_trx, inventory_alerts } = data.inventoryData || {};
+  const filteredInventoryAlerts = useMemo(() => {
+    const alerts = inventory_alerts || [];
+    const keyword = searchQuery.trim().toLowerCase();
+
+    if (!keyword) {
+      return alerts;
+    }
+
+    return alerts.filter((item: InventoryAlertItem) =>
+      [item.item_name, item.unit, item.status]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(keyword)),
+    );
+  }, [inventory_alerts, searchQuery]);
 
   // --- FRAMER MOTION VARIANTS ---
   const containerVariants: Variants = {
@@ -36,8 +54,6 @@ export default function InventoryAlert() {
       </div>
     );
   }
-
-  const { forecast_next_week_trx, inventory_alerts } = data.inventoryData || {};
 
   return (
     <main className="p-4 md:p-8 max-w-7xl mx-auto pb-20">
@@ -68,6 +84,19 @@ export default function InventoryAlert() {
           <h3 className="text-[10px] md:text-xs font-black italic tracking-[0.2em] md:tracking-[0.3em] uppercase mb-6 md:mb-8">
             {'// Material_Live_Monitoring'}
           </h3>
+          <div className="relative mb-4">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-black/40"
+            />
+            <input
+              type="search"
+              placeholder="SEARCH_MATERIAL / UNIT / STATUS"
+              className="w-full border-2 border-black pl-10 pr-3 py-3 font-black text-[10px] tracking-widest uppercase outline-none focus:bg-gray-50"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+          </div>
           <div className="w-full overflow-x-auto border border-black/10">
             <table className="w-full min-w-[600px] text-[10px] md:text-[11px] uppercase font-bold tracking-wider text-left">
               <thead className="bg-gray-50 border-b-2 border-black">
@@ -79,7 +108,7 @@ export default function InventoryAlert() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/10 text-black/70">
-                {inventory_alerts?.map((item: InventoryAlertItem) => (
+                {filteredInventoryAlerts.map((item: InventoryAlertItem) => (
                   <tr
                     key={item.id}
                     className="hover:bg-red-50 transition-colors cursor-pointer"
@@ -110,6 +139,16 @@ export default function InventoryAlert() {
                     </td>
                   </tr>
                 ))}
+                {filteredInventoryAlerts.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-black/40"
+                    >
+                      NO_MATERIAL_MATCH
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -132,7 +171,7 @@ export default function InventoryAlert() {
                 onChange={(e) => setters.setSelectedId(Number(e.target.value))}
               >
                 <option value="">SELECT_MATERIAL</option>
-                {inventory_alerts?.map((item: InventoryAlertItem) => (
+                {filteredInventoryAlerts.map((item: InventoryAlertItem) => (
                   <option key={item.id} value={item.id}>
                     {item.item_name}
                   </option>

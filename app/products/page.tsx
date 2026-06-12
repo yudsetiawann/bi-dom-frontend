@@ -1,8 +1,9 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useProducts } from '@/hooks/useProducts';
-import { Plus, Trash2, Save, Coffee, Edit2, X } from 'lucide-react';
+import { Plus, Trash2, Save, Coffee, Edit2, X, Search } from 'lucide-react';
 import type {
   InventoryMaterial,
   ProductCategory,
@@ -12,6 +13,31 @@ import type {
 
 export default function MasterProduct() {
   const { state, setters, data, mutations, handlers } = useProducts();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredProducts = useMemo(() => {
+    const products = data.products || [];
+    const keyword = searchQuery.trim().toLowerCase();
+
+    if (!keyword) {
+      return products;
+    }
+
+    return products.filter((product: ProductItem) => {
+      const materials = product.materials
+        ?.map((material: ProductMaterial) => material.item_name)
+        .join(' ');
+
+      return [
+        product.name,
+        product.category?.name,
+        String(product.category_id),
+        materials,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(keyword));
+    });
+  }, [data.products, searchQuery]);
 
   // --- FRAMER MOTION VARIANTS ---
   const containerVariants: Variants = {
@@ -201,8 +227,21 @@ export default function MasterProduct() {
           <h3 className="text-xs font-black italic tracking-widest uppercase mb-6 flex items-center gap-2">
             <Coffee size={16} /> {'// Existing_Menu'}
           </h3>
+          <div className="relative mb-4">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-black/40"
+            />
+            <input
+              type="search"
+              placeholder="SEARCH_MENU / CATEGORY / MATERIAL"
+              className="w-full border-2 border-black pl-10 pr-3 py-3 font-black text-[10px] tracking-widest uppercase outline-none focus:bg-gray-50"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+          </div>
           <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-            {data.products?.map((prod: ProductItem) => (
+            {filteredProducts.map((prod: ProductItem) => (
               <div
                 key={prod.id}
                 className={`border-b-2 border-black/5 pb-4 group relative cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded transition-colors ${state.editingId === prod.id ? 'bg-red-50' : ''}`}
@@ -258,6 +297,13 @@ export default function MasterProduct() {
                 )}
               </div>
             ))}
+            {filteredProducts.length === 0 && (
+              <div className="border-2 border-dashed border-black/20 p-6 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                  NO_MENU_MATCH
+                </p>
+              </div>
+            )}
           </div>
         </motion.div>
       </motion.div>

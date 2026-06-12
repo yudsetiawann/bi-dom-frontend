@@ -1,110 +1,124 @@
-```text
-___.   .__              .___              
-\_ |__ |__|           __| _/____   _____  
- | __ \|  |  ______  / __ |/  _ \ /     \ 
- | \_\ \  | /_____/ / /_/ (  <_> )  Y Y  \
- |___  /__|         \____ |\____/|__|_|  /
-     \/                  \/            \/ 
+# BI DOM Frontend
+
+Next.js dashboard client for DOM Social Hub Business Intelligence. The app connects to the Laravel backend API and provides operational views for analytics, CSV imports, invoice lookup, master product setup, and recipe-based inventory forecasting.
+
+## Core Features
+
+- **Login portal:** manager/kasir authentication against the backend API.
+- **BI dashboard:** revenue, COGS, net profit, category charts, top products, peak hours, market basket, and KPI views.
+- **CSV import page:** imports receipt-level transaction data into the backend.
+- **Invoice page:** invoice list and detail modal with payment method visibility.
+- **Master Product page:** create, edit, delete, and search menu products.
+- **Recipe management:** assign inventory materials and usage quantity to every menu product.
+- **Inventory Alert page:** live material monitoring with forecasted usage, critical status, inbound stock update, and material creation.
+- **Search support:** Master Product and Inventory Alert both include search inputs for faster demo and daily usage.
+
+## Backend Integration
+
+Configure the API base URL in `.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
 ```
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="NextJS" />
-  <img src="https://img.shields.io/badge/React_Query-FF4154?style=for-the-badge&logo=reactquery&logoColor=white" alt="React Query" />
-  <img src="https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="ChartJS" />
-</div>
+The frontend runs on:
 
-## 📑 Table of Contents
-- [About The Project](#about-the-project)
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License / Copyright](#license--copyright)
+```text
+http://localhost:3000
+```
 
-## 🚀 About The Project
+The backend API should run on:
 
-**bi-dom-frontend** is the modern data visualization and management dashboard for the BI-DOM architecture. Built to handle complex Business Intelligence interactions, it transforms raw data models into highly interactive, insightful, and beautifully animated charts and tables. Leveraging the cutting-edge Next.js 16 App Router alongside React 19, this frontend client is highly optimized for performance, scalability, and ease of use.
+```text
+http://127.0.0.1:8000/api/v1
+```
 
-By utilizing `@tanstack/react-query` for meticulous state management and data caching alongside `chart.js` for rendering complex data points, the application handles large datasets seamlessly. With a fully integrated `framer-motion` animation system and utility-first Tailwind CSS styling, this project provides a premium enterprise-level user experience from login to data exploration.
+Opening `http://127.0.0.1:8000/api/v1` directly returns `404` because it is an API prefix, not a page.
 
-## ✨ Key Features
-- **Data Visualization Mastery**: Interactive, responsive charting capabilities powered by `react-chartjs-2` and `chart.js`.
-- **Advanced State & Caching**: Efficient API request handling, caching, and background synchronization via `@tanstack/react-query`.
-- **Fluid User Experience**: Smooth component transitions and non-blocking interactions utilizing `framer-motion` and `sonner` for beautiful toast notifications.
-- **Modern Architecture**: Full utilization of the Next.js 16 environment, allowing for enhanced server-side rendering and static site generation protocols.
-- **Secure Handling**: Robust middleware integration with secure local state handling utilizing `js-cookie`.
+## Inventory Forecasting UX
 
-## 🛠 Tech Stack
-- **Framework:** Next.js (16.x)
-- **Library:** React (19.x)
-- **Data Fetching:** Axios, TanStack React Query
-- **Charts:** Chart.js, react-chartjs-2
-- **Styling:** Tailwind CSS (v4)
-- **Animations / UI:** Framer Motion, Lucide React, Sonner
+Inventory Alert is connected to the full transaction and product flow:
 
-## 📂 Project Structure
+1. Master Product stores menu item recipes.
+2. CSV Import sends sold products and quantities to the backend.
+3. Backend reduces current stock based on each product's recipe.
+4. Inventory Alert shows current stock, predicted usage, and `Aman` / `Kritis` status.
+5. Search helps filter by material name, unit, or status.
+
+Master Product search can filter by:
+
+- product name
+- category name
+- category ID
+- recipe material name
+
+Inventory Alert search can filter by:
+
+- material name
+- unit
+- status (`Aman` or `Kritis`)
+
+## Demo CSV
+
+Use the backend sample file for manual demo import:
+
+```text
+database/samples/import-transactions-dom-menu-inventory-alert-demo-fresh.csv
+```
+
+The file uses receipt prefix `DOM-DEMO-PRESENT-*`, so it remains importable as long as it has not been imported before in the current database.
+
+## Tech Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- TanStack React Query
+- Axios
+- Framer Motion
+- Lucide React
+- Sonner
+- Chart.js / react-chartjs-2
+
+## Project Structure
+
 ```text
 bi-dom-frontend/
-├── app/                  # Application routing and root page structures
-├── components/           # Reusable graphical and layout components
-├── hooks/                # Custom React hooks (including React Query bindings)
-├── lib/                  # External integrations and utility handlers
-├── types/                # TypeScript interface and type declarations
-├── middleware.ts         # Authentication and request middleware
-└── package.json          # Dependencies and runtime scripts
+app/          # App Router pages
+components/   # Shared UI components
+hooks/        # React Query hooks and page logic
+lib/          # Axios and utility setup
+types/        # TypeScript API types
+middleware.ts # Route protection
 ```
 
-## 🏁 Getting Started
+## Local Development
 
-### Prerequisites
-- **Node.js**: v18.x or newer
-- **npm**: v9.x or newer
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/fredyyfajarr/bi-dom-frontend.git
-   ```
-2. Navigate into the frontend directory:
-   ```bash
-   cd bi-dom-frontend
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Configure environment properties:
-   ```bash
-   cp .env.example .env
-   ```
-   *Make sure to link the application to your backend API via `.env` variables.*
-
-## 💻 Usage
-
-To start up the local Next.js development server:
+Install dependencies:
 
 ```bash
-npm run dev
+npm install
 ```
 
-The application dashboard will be accessible via `http://localhost:3000`. Hot Module Replacement (HMR) is fully supported during development. To deploy for production:
+Run development server:
+
+```bash
+npm run dev -- -p 3000
+```
+
+Build production bundle:
 
 ```bash
 npm run build
-npm run start
 ```
 
-## 🤝 Contributing
+Lint:
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+```bash
+npm run lint
+```
 
-## 📄 License / Copyright
+## Copyright
 
-Copyright &copy; 2026 Fredy Fajar Adi Putra. All Rights Reserved.
+Copyright (c) 2026 Fredy Fajar Adi Putra. All Rights Reserved.
