@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-montserrat: 'Montserrat', sans-serif;
+  --color-dom-red: #dc2626;
+  --color-dom-black: #050505;
+}
+
+:root {
+  --dom-red: #dc2626;
+}
+
+/* Base Styles Light Mode */
+body {
+  background-color: #ffffff; /* Putih bersih */
+  color: #050505; /* Teks hitam pekat */
+  font-family: var(--font-montserrat);
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Cyberpanel Versi Light */
+@utility cyber-panel {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb; /* Border abu-abu tipis */
+  position: relative;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 15px),
+    calc(100% - 15px) 100%,
+    0 100%
+  );
+  box-shadow: 4px 4px 0px #000000; /* Shadow solid khas industrial */
+}
+
+@utility neon-text-red {
+  color: #dc2626;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
