@@ -103,7 +103,8 @@ export default function CategoryDonutChart({ data }: DonutProps) {
               ctx.shadowColor = 'rgba(0,0,0,0.5)';
               ctx.shadowBlur = 3;
               if (x !== null && y !== null) {
-                ctx.fillText(`${percentage.toFixed(0)}%`, x, y);
+                // Gunakan 1 desimal untuk menghindari error pembulatan (misal total jadi 99%)
+                ctx.fillText(`${percentage.toFixed(1)}%`, x, y);
               }
               ctx.shadowColor = 'transparent';
               ctx.shadowBlur = 0;
