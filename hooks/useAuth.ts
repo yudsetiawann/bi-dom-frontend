@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import Cookies from 'js-cookie';
 import { clearAuthCookies } from '@/lib/authCookies';
 
 export function useAuth() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [userRole] = useState<string | null>(() => Cookies.get('user_role') || null);
-  const [userName] = useState<string | null>(() => Cookies.get('user_name') || null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+
+  // Baca cookie hanya di client side setelah mount (menghindari hydration error)
+  useEffect(() => {
+    setUserRole(Cookies.get('user_role') || null);
+    setUserName(Cookies.get('user_name') || null);
+  }, []);
 
   const executeLogout = async () => {
     setIsLogoutModalOpen(false);
