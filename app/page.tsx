@@ -371,12 +371,12 @@ export default function Dashboard() {
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
             {'// PROFIT_MARGIN (%)'}
           </h3>
-          <div className="flex items-end gap-3">
-            <div className="text-4xl lg:text-5xl font-black text-black">
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-black">
               {data.kpiData?.profit_margin || 0}%
             </div>
             <div
-              className={`px-3 py-1 mb-1 text-xs font-black uppercase border-2 border-black ${Number(data.kpiData?.profit_margin) >= 40 ? 'bg-green-400' : Number(data.kpiData?.profit_margin) >= 20 ? 'bg-yellow-400 text-black' : 'bg-red-400 text-white'}`}
+              className={`px-3 py-1 text-xs font-black uppercase border-2 border-black shrink-0 ${Number(data.kpiData?.profit_margin) >= 40 ? 'bg-green-400' : Number(data.kpiData?.profit_margin) >= 20 ? 'bg-yellow-400 text-black' : 'bg-red-400 text-white'}`}
             >
               {Number(data.kpiData?.profit_margin) >= 40
                 ? 'HEALTHY'
