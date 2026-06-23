@@ -49,8 +49,10 @@ export function useDashboard() {
   // --- DATA FETCHING ---
   const { data: availableYears = [] } = useQuery({
     queryKey: ['availableYears'],
-    queryFn: async () =>
-      (await api.get('/dashboard/available-years')).data.data,
+    queryFn: async () => {
+      const res = await api.get('/dashboard/available-years');
+      return (res.data.data || []).map(Number);
+    },
     ...queryOptions,
   });
 
@@ -63,7 +65,7 @@ export function useDashboard() {
 
   const effectiveSelectedYear =
     availableYears.length > 0 && !availableYears.includes(selectedYear)
-      ? availableYears[0]
+      ? Number(availableYears[0])
       : selectedYear;
 
   const { data: kpiData, dataUpdatedAt: kpiUpdatedAt } = useQuery({

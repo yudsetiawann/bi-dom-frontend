@@ -109,6 +109,8 @@ export default function CategoryDonutChart({ data }: DonutProps) {
               ctx.shadowColor = 'transparent';
               ctx.shadowBlur = 0;
             }
+              ctx.shadowBlur = 0;
+            }
           }
         });
       });
@@ -116,7 +118,7 @@ export default function CategoryDonutChart({ data }: DonutProps) {
   };
 
   return (
-    <div className="relative w-full h-[300px] md:h-full flex items-center justify-center pb-2">
+    <div className="relative w-full h-[300px] flex items-center justify-center pb-2">
       <Doughnut
         data={chartData}
         options={options}

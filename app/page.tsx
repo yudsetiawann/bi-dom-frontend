@@ -392,12 +392,12 @@ export default function Dashboard() {
       </motion.div>
 
       <motion.div
-        className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12"
+        className="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-12"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, type: 'spring' }}
       >
-        <div className="lg:col-span-3 p-4 md:p-8 bg-white border-2 border-black shadow-[6px_6px_0px_#000000]">
+        <div className="xl:col-span-3 p-4 md:p-8 bg-white border-2 border-black shadow-[6px_6px_0px_#000000]">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xs font-black italic tracking-[0.2em] uppercase">
               {'// REVENUE_TREND'}
