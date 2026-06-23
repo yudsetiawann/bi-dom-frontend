@@ -413,6 +413,7 @@ export default function Dashboard() {
           </div>
           <div className="h-[350px]">
             <SalesChart
+              key={`sales-chart-${data.chartData?.labels?.length || 0}-${JSON.stringify(data.chartData?.datasets || [])}`}
               labels={data.chartData?.labels || []}
               datasets={data.chartData?.datasets || []}
               onPointClick={handlers.handleChartClick}
@@ -426,7 +427,10 @@ export default function Dashboard() {
           </h3>
           <div className="flex-grow">
             {data.donutData ? (
-              <CategoryDonutChart data={data.donutData} />
+              <CategoryDonutChart
+                key={`donut-chart-${JSON.stringify(data.donutData)}`}
+                data={data.donutData}
+              />
             ) : (
               <div className="animate-pulse bg-gray-100 h-full w-full"></div>
             )}
@@ -469,7 +473,10 @@ export default function Dashboard() {
           </h3>
           <div className="h-[250px]">
             {data.advData?.daily_revenue && (
-              <DailyBarChart data={data.advData.daily_revenue} />
+              <DailyBarChart
+                key={`daily-chart-${JSON.stringify(data.advData.daily_revenue)}`}
+                data={data.advData.daily_revenue}
+              />
             )}
           </div>
         </div>
@@ -480,6 +487,7 @@ export default function Dashboard() {
           <div className="h-[250px]">
             {data.advData?.stacked_trend && data.chartData?.labels && (
               <StackedCategoryChart
+                key={`stacked-chart-${JSON.stringify(data.advData.stacked_trend)}`}
                 data={data.advData.stacked_trend}
                 period={state.chartPeriod}
                 labels={data.chartData.labels}
