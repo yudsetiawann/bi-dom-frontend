@@ -251,6 +251,9 @@ export function useDashboard() {
       params.set('end_date', dateRange.end);
     }
     if (selectedCategoryId) params.set('category_id', selectedCategoryId);
+    if (hiddenCategories.length > 0) {
+      params.set('exclude', hiddenCategories.join(','));
+    }
     return params.toString();
   }, [
     effectiveSelectedYear,
@@ -258,6 +261,7 @@ export function useDashboard() {
     selectedMonthIndex,
     dateRange,
     selectedCategoryId,
+    hiddenCategories,
   ]);
 
   // Export semua yang dibutuhkan oleh View (UI)
