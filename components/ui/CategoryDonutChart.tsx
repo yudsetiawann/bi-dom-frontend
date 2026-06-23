@@ -109,8 +109,6 @@ export default function CategoryDonutChart({ data }: DonutProps) {
               ctx.shadowColor = 'transparent';
               ctx.shadowBlur = 0;
             }
-              ctx.shadowBlur = 0;
-            }
           }
         });
       });
