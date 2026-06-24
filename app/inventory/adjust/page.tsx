@@ -47,6 +47,11 @@ export default function StockAdjustment() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'waste' | 'opname'>('waste');
 
+  // --- PAGINATION STATES ---
+  const [wastePage, setWastePage] = useState(1);
+  const [opnamePage, setOpnamePage] = useState(1);
+  const pageSize = 8;
+
   // --- WASTE FORM STATE ---
   const [wasteInventoryId, setWasteInventoryId] = useState('');
   const [qtyWasted, setQtyWasted] = useState('');
@@ -76,6 +81,12 @@ export default function StockAdjustment() {
     queryFn: async () => (await api.get('/inventory/opname')).data.data as StockOpname[],
   });
 
+  // --- PAGINATION DERIVED VALUES ---
+  const paginatedWaste = wasteLogs.slice((wastePage - 1) * pageSize, wastePage * pageSize);
+  const paginatedOpname = opnameLogs.slice((opnamePage - 1) * pageSize, opnamePage * pageSize);
+  const totalWastePages = Math.max(1, Math.ceil(wasteLogs.length / pageSize));
+  const totalOpnamePages = Math.max(1, Math.ceil(opnameLogs.length / pageSize));
+
   // --- MUTATIONS ---
   const logWasteMutation = useMutation({
     mutationFn: async (payload: {
@@ -92,6 +103,7 @@ export default function StockAdjustment() {
       setWasteInventoryId('');
       setQtyWasted('');
       setWasteLoggedAt('');
+      setWastePage(1);
       toast.success('WASTE_LOGGED', {
         description: 'Kerusakan/bahan terbuang berhasil dicatat.',
       });
@@ -116,6 +128,7 @@ export default function StockAdjustment() {
       setOpnameInventoryId('');
       setPhysicalQty('');
       setOpnameAdjustedAt('');
+      setOpnamePage(1);
       toast.success('OPNAME_LOGGED', {
         description: 'Rekonsiliasi stok fisik berhasil dicatat.',
       });
@@ -408,7 +421,7 @@ export default function StockAdjustment() {
                       <td colSpan={5} className="p-8 text-center text-gray-400 font-bold italic">NO_WASTE_RECORDED</td>
                     </tr>
                   ) : (
-                    wasteLogs.map((log) => (
+                    paginatedWaste.map((log) => (
                       <tr key={log.id} className="hover:bg-gray-50">
                         <td className="p-3 whitespace-nowrap text-gray-500">
                           {new Date(log.logged_at).toLocaleDateString('id-ID', {
@@ -455,7 +468,7 @@ export default function StockAdjustment() {
                       <td colSpan={6} className="p-8 text-center text-gray-400 font-bold italic">NO_OPNAME_RECORDED</td>
                     </tr>
                   ) : (
-                    opnameLogs.map((log) => (
+                    paginatedOpname.map((log) => (
                       <tr key={log.id} className="hover:bg-gray-50">
                         <td className="p-3 whitespace-nowrap text-gray-500">
                           {new Date(log.adjusted_at).toLocaleDateString('id-ID', {
@@ -479,6 +492,55 @@ export default function StockAdjustment() {
               </table>
             )}
           </div>
+
+          {/* PAGINATION CONTROLS */}
+          {activeTab === 'waste' && wasteLogs.length > pageSize && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-black/10">
+              <span className="text-[10px] font-black uppercase text-gray-500">
+                Page {wastePage} / {totalWastePages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={wastePage === 1}
+                  onClick={() => setWastePage(p => Math.max(1, p - 1))}
+                  className="bg-white hover:bg-gray-50 disabled:opacity-50 text-black border-2 border-black px-3 py-1 text-[10px] font-black uppercase transition-colors"
+                >
+                  Prev
+                </button>
+                <button
+                  disabled={wastePage === totalWastePages}
+                  onClick={() => setWastePage(p => Math.min(totalWastePages, p + 1))}
+                  className="bg-white hover:bg-gray-50 disabled:opacity-50 text-black border-2 border-black px-3 py-1 text-[10px] font-black uppercase transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'opname' && opnameLogs.length > pageSize && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-black/10">
+              <span className="text-[10px] font-black uppercase text-gray-500">
+                Page {opnamePage} / {totalOpnamePages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={opnamePage === 1}
+                  onClick={() => setOpnamePage(p => Math.max(1, p - 1))}
+                  className="bg-white hover:bg-gray-50 disabled:opacity-50 text-black border-2 border-black px-3 py-1 text-[10px] font-black uppercase transition-colors"
+                >
+                  Prev
+                </button>
+                <button
+                  disabled={opnamePage === totalOpnamePages}
+                  onClick={() => setOpnamePage(p => Math.min(totalOpnamePages, p + 1))}
+                  className="bg-white hover:bg-gray-50 disabled:opacity-50 text-black border-2 border-black px-3 py-1 text-[10px] font-black uppercase transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

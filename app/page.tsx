@@ -342,7 +342,7 @@ export default function Dashboard() {
               : data.chartData?.labels[0]?.split(' ')[1] || 'ALL'}
             )
           </h3>
-          <div className="text-2xl lg:text-3xl font-black text-black break-words">
+          <div className="text-lg sm:text-xl lg:text-2xl font-black text-black break-words">
             {formatRupiah(data.kpiData?.revenue)}
           </div>
           <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
@@ -358,7 +358,7 @@ export default function Dashboard() {
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
             {'// THEORETICAL_COGS'}
           </h3>
-          <div className="text-2xl lg:text-3xl font-black text-black break-words">
+          <div className="text-lg sm:text-xl lg:text-2xl font-black text-black break-words">
             {formatRupiah(data.kpiData?.total_cogs)}
           </div>
           <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
@@ -374,7 +374,7 @@ export default function Dashboard() {
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-red-600 mb-2">
             {'// OPERATIONAL_LOSS'}
           </h3>
-          <div className="text-2xl lg:text-3xl font-black text-red-600 break-words">
+          <div className="text-lg sm:text-xl lg:text-2xl font-black text-red-600 break-words">
             {formatRupiah((data.kpiData?.waste_loss ?? 0) + (data.kpiData?.opname_loss ?? 0))}
           </div>
           <p className="text-[9px] font-bold text-gray-400 mt-2 uppercase tracking-tight">
@@ -407,7 +407,7 @@ export default function Dashboard() {
                   : 'CRITICAL'}
             </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-black break-words">
+          <div className="text-lg sm:text-xl lg:text-2xl font-black break-words">
             {formatRupiah(data.kpiData?.actual_net_profit ?? data.kpiData?.net_profit ?? 0)}
           </div>
           <p className="text-[10px] font-bold text-white/70 mt-2 uppercase tracking-widest">
