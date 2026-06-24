@@ -6,6 +6,10 @@ export interface KpiData {
   profit_margin: number;
   total_cogs: number;
   transaction_count: number;
+  waste_loss?: number;
+  opname_loss?: number;
+  actual_net_profit?: number;
+  actual_profit_margin?: number;
 }
 
 export interface MarketBasketPair {

@@ -325,14 +325,15 @@ export default function Dashboard() {
 
       {/* KPI SUMMARY CARDS */}
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-2"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-2"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
+        {/* CARD 1: REVENUE */}
         <motion.div
           variants={itemVariants}
-          className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
+          className="bg-white border-2 border-black p-5 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
         >
           <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
             {'// GROSS_REVENUE ('}
@@ -341,7 +342,7 @@ export default function Dashboard() {
               : data.chartData?.labels[0]?.split(' ')[1] || 'ALL'}
             )
           </h3>
-          <div className="text-3xl lg:text-3xl font-black text-black break-words">
+          <div className="text-2xl lg:text-3xl font-black text-black break-words">
             {formatRupiah(data.kpiData?.revenue)}
           </div>
           <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
@@ -349,44 +350,68 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
+        {/* CARD 2: COGS (RESEP) */}
         <motion.div
           variants={itemVariants}
-          className="bg-red-600 border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between text-white"
+          className="bg-white border-2 border-black p-5 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
         >
-          <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-white/70 mb-2">
-            {'// NET_PROFIT (LABA BERSIH)'}
+          <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
+            {'// THEORETICAL_COGS'}
           </h3>
-          <div className="text-3xl lg:text-3xl font-black break-words">
-            {formatRupiah(data.kpiData?.net_profit)}
+          <div className="text-2xl lg:text-3xl font-black text-black break-words">
+            {formatRupiah(data.kpiData?.total_cogs)}
           </div>
-          <p className="text-[10px] font-bold text-white/70 mt-2 uppercase tracking-widest">
-            Uang yang bisa dicairkan
+          <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
+            Margin Kotor: {data.kpiData?.profit_margin || 0}%
           </p>
         </motion.div>
 
+        {/* CARD 3: OPERATIONAL LOSS */}
         <motion.div
           variants={itemVariants}
-          className="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
+          className="bg-white border-2 border-black p-5 shadow-[6px_6px_0px_#000000] flex flex-col justify-between"
         >
-          <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-gray-500 mb-2">
-            {'// PROFIT_MARGIN (%)'}
+          <h3 className="text-[10px] font-black italic tracking-[0.2em] uppercase text-red-600 mb-2">
+            {'// OPERATIONAL_LOSS'}
           </h3>
-          <div className="flex flex-wrap items-center gap-2 mt-1">
-            <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-black">
-              {data.kpiData?.profit_margin || 0}%
-            </div>
+          <div className="text-2xl lg:text-3xl font-black text-red-600 break-words">
+            {formatRupiah((data.kpiData?.waste_loss ?? 0) + (data.kpiData?.opname_loss ?? 0))}
+          </div>
+          <p className="text-[9px] font-bold text-gray-400 mt-2 uppercase tracking-tight">
+            Basi: {formatRupiah(data.kpiData?.waste_loss || 0)} // Selisih: {formatRupiah(data.kpiData?.opname_loss || 0)}
+          </p>
+        </motion.div>
+
+        {/* CARD 4: LABA BERSIH AKTUAL */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-red-600 border-2 border-black p-5 shadow-[6px_6px_0px_#000000] flex flex-col justify-between text-white"
+        >
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-[10px] font-black italic tracking-[0.15em] uppercase text-white/70">
+              {'// LABA_BERSIH_AKTUAL'}
+            </h3>
             <div
-              className={`px-3 py-1 text-xs font-black uppercase border-2 border-black shrink-0 ${Number(data.kpiData?.profit_margin) >= 40 ? 'bg-green-400' : Number(data.kpiData?.profit_margin) >= 20 ? 'bg-yellow-400 text-black' : 'bg-red-400 text-white'}`}
+              className={`px-1.5 py-0.5 text-[8px] font-black uppercase border border-white shrink-0 ${
+                (data.kpiData?.actual_profit_margin ?? data.kpiData?.profit_margin ?? 0) >= 35
+                  ? 'bg-green-500 text-white'
+                  : (data.kpiData?.actual_profit_margin ?? data.kpiData?.profit_margin ?? 0) >= 20
+                    ? 'bg-yellow-400 text-black border-yellow-400'
+                    : 'bg-black text-white border-black'
+              }`}
             >
-              {Number(data.kpiData?.profit_margin) >= 40
+              {(data.kpiData?.actual_profit_margin ?? data.kpiData?.profit_margin ?? 0) >= 35
                 ? 'HEALTHY'
-                : Number(data.kpiData?.profit_margin) >= 20
+                : (data.kpiData?.actual_profit_margin ?? data.kpiData?.profit_margin ?? 0) >= 20
                   ? 'WARNING'
                   : 'CRITICAL'}
             </div>
           </div>
-          <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
-            Modal/COGS: {formatRupiah(data.kpiData?.total_cogs)}
+          <div className="text-2xl lg:text-3xl font-black break-words">
+            {formatRupiah(data.kpiData?.actual_net_profit ?? data.kpiData?.net_profit ?? 0)}
+          </div>
+          <p className="text-[10px] font-bold text-white/70 mt-2 uppercase tracking-widest">
+            Margin Aktual: {data.kpiData?.actual_profit_margin ?? data.kpiData?.profit_margin ?? 0}%
           </p>
         </motion.div>
       </motion.div>
