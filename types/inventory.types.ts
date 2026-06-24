@@ -21,6 +21,8 @@ export interface InventoryAlertItem {
   predicted_usage: number;
   usage_basis: 'RECIPE_SMA_30D' | 'NO_RECENT_USAGE' | 'TRX_AVG_FALLBACK';
   status: string;
+  min_stock?: number;
+  usage_per_trx?: number;
 }
 
 export interface InventoryAlertsResponse {

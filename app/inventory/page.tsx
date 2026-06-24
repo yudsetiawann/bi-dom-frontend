@@ -153,7 +153,20 @@ export default function InventoryAlert() {
                     onClick={() => setters.setSelectedId(item.id)}
                   >
                     <td className="p-3 font-black text-black">
-                      {item.item_name}
+                      <div className="flex flex-col">
+                        <span>{item.item_name}</span>
+                        <div className="flex items-center gap-2 mt-1 text-[8px] text-gray-400 font-bold tracking-wider">
+                          {item.min_stock !== undefined && (
+                            <span>MIN: {item.min_stock} {item.unit}</span>
+                          )}
+                          {item.min_stock !== undefined && item.usage_per_trx !== undefined && (
+                            <span className="text-gray-300">|</span>
+                          )}
+                          {item.usage_per_trx !== undefined && (
+                            <span>USAGE/TRX: {item.usage_per_trx} {item.unit}</span>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="p-3 text-center">
                       {item.current_stock}{' '}
