@@ -113,7 +113,7 @@ export default function CategoryDonutChart({ data }: DonutProps) {
           const value = dataset.data[index] as number;
           if (value > 0 && visibleTotal > 0) {
             const percentage = (value / visibleTotal) * 100;
-            if (percentage > 5) {
+            if (percentage >= 3) {
               const { x, y } = element.tooltipPosition(true);
               ctx.fillStyle = '#ffffff';
               ctx.font = `bold ${percentFontSize}px Montserrat, sans-serif`;
