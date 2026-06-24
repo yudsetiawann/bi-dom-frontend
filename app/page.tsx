@@ -224,7 +224,7 @@ export default function Dashboard() {
       )}
 
       {/* HEADER */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-start mb-10 gap-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter text-black uppercase">
             Central_Analytics
