@@ -18,8 +18,6 @@ interface DonutProps {
 }
 
 export default function CategoryDonutChart({ data }: DonutProps) {
-  const totalQty = data.reduce((sum, item) => sum + Number(item.value), 0);
-
   const chartData = {
     labels: data.map((d) => d.label.toUpperCase()),
     datasets: [
@@ -50,8 +48,14 @@ export default function CategoryDonutChart({ data }: DonutProps) {
         callbacks: {
           label: (context: TooltipItem<'doughnut'>) => {
             const val = context.raw;
+            // Hitung total dari dataset yang terlihat saja
+            const dataArr = context.chart.data.datasets[0].data || [];
+            const visibleTotal = dataArr.reduce<number>(
+              (sum, item, idx) => sum + (context.chart.getDataVisibility(idx) ? Number(item || 0) : 0),
+              0
+            );
             const percentage =
-              totalQty > 0 ? ((Number(val) / totalQty) * 100).toFixed(1) : '0';
+              visibleTotal > 0 ? ((Number(val) / visibleTotal) * 100).toFixed(1) : '0';
             return ` ${Number(val).toLocaleString('id-ID')} PCS (${percentage}%)`;
           },
         },
@@ -73,7 +77,17 @@ export default function CategoryDonutChart({ data }: DonutProps) {
       const numberFontSize = isMobile ? 12 : 16;
       const percentFontSize = isMobile ? 9 : 12;
 
-      if (centerX && centerY && totalQty > 0) {
+      // Hitung total dari item yang terlihat saja di legend
+      let visibleTotal = 0;
+      chart.data.datasets.forEach((dataset) => {
+        dataset.data.forEach((val, idx) => {
+          if (chart.getDataVisibility(idx)) {
+            visibleTotal += Number(val || 0);
+          }
+        });
+      });
+
+      if (centerX && centerY && visibleTotal > 0) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = `900 ${titleFontSize}px Montserrat, sans-serif`;
@@ -82,7 +96,7 @@ export default function CategoryDonutChart({ data }: DonutProps) {
         ctx.font = `900 ${numberFontSize}px Montserrat, sans-serif`;
         ctx.fillStyle = '#000000';
         ctx.fillText(
-          `${totalQty.toLocaleString('id-ID')} PCS`,
+          `${visibleTotal.toLocaleString('id-ID')} PCS`,
           centerX,
           centerY + (isMobile ? 8 : 12),
         );
@@ -91,19 +105,24 @@ export default function CategoryDonutChart({ data }: DonutProps) {
       chart.data.datasets.forEach((dataset, i) => {
         const currentMeta = chart.getDatasetMeta(i);
         currentMeta.data.forEach((element, index) => {
+          // Hanya gambar persenan jika item tersebut terlihat (tidak disembunyikan di legend)
+          if (!chart.getDataVisibility(index)) {
+            return;
+          }
+          
           const value = dataset.data[index] as number;
-          if (value > 0 && totalQty > 0) {
-            const percentage = (value / totalQty) * 100;
+          if (value > 0 && visibleTotal > 0) {
+            const percentage = (value / visibleTotal) * 100;
             if (percentage > 5) {
               const { x, y } = element.tooltipPosition(true);
               ctx.fillStyle = '#ffffff';
               ctx.font = `bold ${percentFontSize}px Montserrat, sans-serif`;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
               ctx.shadowColor = 'rgba(0,0,0,0.5)';
               ctx.shadowBlur = 3;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
               if (x !== null && y !== null) {
-                // Gunakan 1 desimal untuk menghindari error pembulatan (misal total jadi 99%)
+                // Gunakan 1 desimal untuk menghindari error pembulatan
                 ctx.fillText(`${percentage.toFixed(1)}%`, x, y);
               }
               ctx.shadowColor = 'transparent';
