@@ -27,6 +27,8 @@ export interface InventoryAlert {
   unit: string;
   predicted_usage: number;
   status: string;
+  min_stock?: number;
+  usage_per_trx?: number;
 }
 
 export interface TopProduct {

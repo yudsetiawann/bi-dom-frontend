@@ -656,15 +656,29 @@ export default function Dashboard() {
                   key={i}
                   className="flex justify-between items-center p-3 border-2 border-red-600/20 bg-red-50/50 cursor-default"
                 >
-                  <span className="text-[10px] font-black truncate max-w-[120px]">
-                    {item.item_name}
-                  </span>
-                  <span className="text-[10px] font-black text-red-600 bg-white px-2 border-2 border-red-600">
-                    {item.current_stock}{' '}
-                    <span className="text-[8px] text-gray-500">
-                      {item.unit || 'PCS'}
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-black truncate max-w-[150px]">
+                      {item.item_name}
                     </span>
-                  </span>
+                    {item.usage_per_trx !== undefined && (
+                      <span className="text-[8px] text-gray-400 font-bold mt-0.5 uppercase">
+                        Usage: {item.usage_per_trx} {item.unit || 'PCS'} / Trx
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 ml-4">
+                    <span className="text-[10px] font-black text-red-600 bg-white px-2 border-2 border-red-600">
+                      {item.current_stock}{' '}
+                      <span className="text-[8px] text-gray-500">
+                        {item.unit || 'PCS'}
+                      </span>
+                    </span>
+                    {item.min_stock !== undefined && (
+                      <span className="text-[8px] text-gray-400 font-bold mt-1">
+                        Min: {item.min_stock} {item.unit || 'PCS'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             ) : (
