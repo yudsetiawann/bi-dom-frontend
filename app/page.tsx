@@ -416,7 +416,6 @@ export default function Dashboard() {
               labels={data.chartData?.labels || []}
               datasets={data.chartData?.datasets || []}
               onPointClick={handlers.handleChartClick}
-              onLegendChange={setters.setHiddenCategories}
             />
           </div>
         </div>
