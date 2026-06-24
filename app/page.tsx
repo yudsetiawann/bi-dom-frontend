@@ -224,12 +224,12 @@ export default function Dashboard() {
       )}
 
       {/* HEADER */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-start mb-10 gap-6">
         <div>
-          <h1 className="text-4xl font-black italic tracking-tighter uppercase">
+          <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter text-black uppercase">
             Central_Analytics
           </h1>
-          <p className="text-[10px] text-red-600 font-bold tracking-[0.4em] uppercase mt-1">
+          <p className="text-[10px] text-red-600 font-bold tracking-[0.4em] uppercase mt-1 underline decoration-2 underline-offset-4">
             DOM Social Hub Integrated System
           </p>
         </div>
@@ -417,7 +417,6 @@ export default function Dashboard() {
               labels={data.chartData?.labels || []}
               datasets={data.chartData?.datasets || []}
               onPointClick={handlers.handleChartClick}
-              onLegendChange={setters.setHiddenCategories}
             />
           </div>
         </div>

@@ -83,7 +83,7 @@ export default function MasterProduct() {
   }
 
   return (
-    <main className="p-4 md:p-8 max-w-6xl mx-auto pb-20 font-montserrat">
+    <main className="p-4 md:p-8 max-w-7xl mx-auto pb-20 font-montserrat">
       <header className="mb-10">
         <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter text-black uppercase">
           Master_Catalog
@@ -94,7 +94,7 @@ export default function MasterProduct() {
       </header>
 
       <motion.div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -102,7 +102,7 @@ export default function MasterProduct() {
         {/* FORM KIRI (ADD / EDIT) */}
         <motion.div
           variants={itemVariants}
-          className={`border-2 border-black p-6 transition-all ${state.editingId ? 'bg-red-50 shadow-[8px_8px_0px_#dc2626]' : 'bg-white shadow-[8px_8px_0px_#000000]'}`}
+          className={`lg:col-span-1 border-2 border-black p-6 transition-all ${state.editingId ? 'bg-red-50 shadow-[8px_8px_0px_#dc2626]' : 'bg-white shadow-[8px_8px_0px_#000000]'}`}
         >
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xs font-black italic tracking-widest uppercase flex items-center gap-2">
@@ -248,7 +248,7 @@ export default function MasterProduct() {
         {/* LIST KANAN (EXISTING MENU) */}
         <motion.div
           variants={itemVariants}
-          className="bg-white border-2 border-black p-6 shadow-[8px_8px_0px_#dc2626]"
+          className="lg:col-span-2 bg-white border-2 border-black p-6 shadow-[8px_8px_0px_#dc2626]"
         >
           <h3 className="text-xs font-black italic tracking-widest uppercase mb-6 flex items-center gap-2">
             <Coffee size={16} /> {'// Existing_Menu'}
