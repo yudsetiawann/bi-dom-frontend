@@ -15,6 +15,7 @@ import {
   Coffee,
   PackageSearch,
   ReceiptText,
+  ClipboardList,
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -47,6 +48,11 @@ export default function Sidebar() {
       name: 'Inventory Alert',
       path: '/inventory',
       icon: <PackageSearch size={20} strokeWidth={2.5} />,
+    },
+    {
+      name: 'Stock Adjustment',
+      path: '/inventory/adjust',
+      icon: <ClipboardList size={20} strokeWidth={2.5} />,
     },
     {
       name: 'Invoice',

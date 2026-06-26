@@ -66,11 +66,11 @@ export default function InvoiceReceiptPage() {
         isLoading={loaders.loadDetail}
       />
 
-      <header className="mb-8">
-        <h1 className="text-4xl font-black italic tracking-tighter uppercase flex items-center gap-3">
-          <FileText className="text-red-600" size={36} /> INVOICE_RECEIPTS
+      <header className="mb-10">
+        <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter text-black uppercase">
+          Invoice_Receipts
         </h1>
-        <p className="text-[10px] text-red-600 font-bold tracking-[0.4em] uppercase mt-1">
+        <p className="text-[10px] text-red-600 font-bold tracking-[0.4em] uppercase mt-1 underline decoration-2 underline-offset-4">
           Master Transaction Ledger
         </p>
       </header>
